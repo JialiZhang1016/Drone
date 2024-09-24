@@ -1,0 +1,25 @@
+Time Step: 1
+Current Location: 4
+Remaining Time: 46.05172622287783
+Visited Locations: [0, 4]
+Weather: Bad
+Total Reward: -14.465536005900496
+-----
+Action Taken: Move to Location 4, Data Collection Time: 3.95
+Reward Received: -14.465536005900496
+Done: False
+=====
+
+Time Step: 1
+Current Location: 4
+Remaining Time: 46.05172622287783
+Visited Locations: [0, 4]
+Weather: Bad
+Total Reward: -14.465536005900496
+-----
+Action Taken: Move to Location 5, Data Collection Time: 4.61
+Reward Received: -10000
+Done: True
+=====
+
+Episode finished. Total Reward: -14.465536005900496

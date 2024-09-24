@@ -1,0 +1,177 @@
+Episode 1
+==============================
+Time Step: 1
+Current Location: 4
+Remaining Time: 47.15500294893247
+Visited Locations: [0, 4]
+Weather: Bad
+Total Reward: -24.395026540392237
+-----
+Action: Move to Location 4, Data Collection Time: 2.84
+Reward: -24.40
+Done: False
+-----
+Time Step: 1
+Current Location: 4
+Remaining Time: 47.15500294893247
+Visited Locations: [0, 4]
+Weather: Bad
+Total Reward: -24.395026540392237
+-----
+Action: Move to Location 5, Data Collection Time: 2.10
+Reward: -10000.00
+Done: True
+-----
+Episode 1 finished.
+Total Reward: -10024.40
+Final Location: 4
+Visited Locations: [0, 4]
+
+==================================================
+
+Episode 2
+==============================
+Time Step: 1
+Current Location: 1
+Remaining Time: 77.57417800101342
+Visited Locations: [0, 1]
+Weather: Bad
+Total Reward: -17.574178001013422
+-----
+Action: Move to Location 1, Data Collection Time: 2.43
+Reward: -17.57
+Done: False
+-----
+Time Step: 1
+Current Location: 1
+Remaining Time: 77.57417800101342
+Visited Locations: [0, 1]
+Weather: Bad
+Total Reward: -17.574178001013422
+-----
+Action: Move to Location 5, Data Collection Time: 3.21
+Reward: -10000.00
+Done: True
+-----
+Episode 2 finished.
+Total Reward: -10017.57
+Final Location: 1
+Visited Locations: [0, 1]
+
+==================================================
+
+Episode 3
+==============================
+Time Step: 1
+Current Location: 2
+Remaining Time: 67.40272663902616
+Visited Locations: [0, 2]
+Weather: Bad
+Total Reward: -6.6245397512353215
+-----
+Action: Move to Location 2, Data Collection Time: 2.60
+Reward: -6.62
+Done: False
+-----
+Time Step: 1
+Current Location: 2
+Remaining Time: 67.40272663902616
+Visited Locations: [0, 2]
+Weather: Bad
+Total Reward: -6.6245397512353215
+-----
+Action: Move to Location 5, Data Collection Time: 4.80
+Reward: -10000.00
+Done: True
+-----
+Episode 3 finished.
+Total Reward: -10006.62
+Final Location: 2
+Visited Locations: [0, 2]
+
+==================================================
+
+Episode 4
+==============================
+Time Step: 1
+Current Location: 2
+Remaining Time: 67.22388399278248
+Visited Locations: [0, 2]
+Weather: Bad
+Total Reward: -5.014955935042288
+-----
+Action: Move to Location 2, Data Collection Time: 2.78
+Reward: -5.01
+Done: False
+-----
+Time Step: 2
+Current Location: 1
+Remaining Time: 57.46880738801287
+Visited Locations: [0, 2, 1]
+Weather: Good
+Total Reward: -5.259879330272684
+-----
+Action: Move to Location 1, Data Collection Time: 4.76
+Reward: -0.24
+Done: False
+-----
+Time Step: 2
+Current Location: 1
+Remaining Time: 57.46880738801287
+Visited Locations: [0, 2, 1]
+Weather: Good
+Total Reward: -5.259879330272684
+-----
+Action: Move to Location 5, Data Collection Time: 3.90
+Reward: -10000.00
+Done: True
+-----
+Episode 4 finished.
+Total Reward: -10005.26
+Final Location: 1
+Visited Locations: [0, 2, 1]
+
+==================================================
+
+Episode 5
+==============================
+Time Step: 1
+Current Location: 3
+Remaining Time: 75.55728187393248
+Visited Locations: [0, 3]
+Weather: Good
+Total Reward: -15.557281873932478
+-----
+Action: Move to Location 3, Data Collection Time: 4.44
+Reward: -15.56
+Done: False
+-----
+Time Step: 2
+Current Location: 1
+Remaining Time: 51.01553333151534
+Visited Locations: [0, 3, 1]
+Weather: Bad
+Total Reward: -31.015533331515336
+-----
+Action: Move to Location 1, Data Collection Time: 4.54
+Reward: -15.46
+Done: False
+-----
+Time Step: 2
+Current Location: 1
+Remaining Time: 51.01553333151534
+Visited Locations: [0, 3, 1]
+Weather: Bad
+Total Reward: -31.015533331515336
+-----
+Action: Move to Location 4, Data Collection Time: 4.59
+Reward: -10000.00
+Done: True
+-----
+Episode 5 finished.
+Total Reward: -10031.02
+Final Location: 1
+Visited Locations: [0, 3, 1]
+
+==================================================
+
