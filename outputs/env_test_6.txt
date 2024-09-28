@@ -1,0 +1,276 @@
+Episode 1
+==============================
+Time Step: 1
+Current Location: 0
+Remaining Time: 300.0
+Visited Locations: [0, 0]
+Weather: Bad
+Total Reward: 0.0
+-----
+Action: Move to Location 0, Data Collection Time: 0.00
+Reward: 0.00
+Done: False
+-----
+Time Step: 2
+Current Location: 5
+Remaining Time: 235.2069526983666
+Visited Locations: [0, 0, 5]
+Weather: Bad
+Total Reward: -55.206952698366585
+-----
+Action: Move to Location 5, Data Collection Time: 4.79
+Reward: -55.21
+Done: False
+-----
+Time Step: 3
+Current Location: 4
+Remaining Time: 226.78897160009168
+Visited Locations: [0, 0, 5, 4]
+Weather: Good
+Total Reward: -29.44512281389249
+-----
+Action: Move to Location 4, Data Collection Time: 3.42
+Reward: 25.76
+Done: False
+-----
+Time Step: 4
+Current Location: 2
+Remaining Time: 201.91704453442347
+Visited Locations: [0, 0, 5, 4, 2]
+Weather: Bad
+Total Reward: -5.597779222878536
+-----
+Action: Move to Location 2, Data Collection Time: 4.87
+Reward: 23.85
+Done: False
+-----
+Time Step: 5
+Current Location: 1
+Remaining Time: 188.358124824321
+Visited Locations: [0, 0, 5, 4, 2, 1]
+Weather: Bad
+Total Reward: -12.038859512776082
+-----
+Action: Move to Location 1, Data Collection Time: 3.56
+Reward: -6.44
+Done: False
+-----
+Time Step: 6
+Current Location: 0
+Remaining Time: 168.358124824321
+Visited Locations: [0, 0, 5, 4, 2, 1, 0]
+Weather: Bad
+Total Reward: -32.038859512776085
+-----
+Action: Move to Location 0, Data Collection Time: 0.00
+Reward: -20.00
+Done: True
+-----
+Episode 1 finished.
+Total Reward: -32.04
+Final Location: 0
+Visited Locations: [0, 0, 5, 4, 2, 1, 0]
+
+==================================================
+
+Episode 2
+==============================
+Time Step: 1
+Current Location: 5
+Remaining Time: 267.5987931944126
+Visited Locations: [0, 5]
+Weather: Good
+Total Reward: -27.598793194412636
+-----
+Action: Move to Location 5, Data Collection Time: 2.40
+Reward: -27.60
+Done: False
+-----
+Time Step: 2
+Current Location: 4
+Remaining Time: 259.55930327132216
+Visited Locations: [0, 5, 4]
+Weather: Good
+Total Reward: -5.2433838865987
+-----
+Action: Move to Location 4, Data Collection Time: 3.04
+Reward: 22.36
+Done: False
+-----
+Time Step: 3
+Current Location: 0
+Remaining Time: 209.55930327132216
+Visited Locations: [0, 5, 4, 0]
+Weather: Bad
+Total Reward: -55.2433838865987
+-----
+Action: Move to Location 0, Data Collection Time: 0.00
+Reward: -50.00
+Done: True
+-----
+Episode 2 finished.
+Total Reward: -55.24
+Final Location: 0
+Visited Locations: [0, 5, 4, 0]
+
+==================================================
+
+Episode 3
+==============================
+Time Step: 1
+Current Location: 2
+Remaining Time: 282.1553416700094
+Visited Locations: [0, 2]
+Weather: Good
+Total Reward: 10.601924969915448
+-----
+Action: Move to Location 2, Data Collection Time: 2.84
+Reward: 10.60
+Done: False
+-----
+Time Step: 2
+Current Location: 5
+Remaining Time: 262.80158925132395
+Visited Locations: [0, 2, 5]
+Weather: Good
+Total Reward: -0.04432261139908711
+-----
+Action: Move to Location 5, Data Collection Time: 4.35
+Reward: -10.65
+Done: False
+-----
+Time Step: 3
+Current Location: 1
+Remaining Time: 219.1698038705332
+Visited Locations: [0, 2, 5, 1]
+Weather: Bad
+Total Reward: -36.41253723060834
+-----
+Action: Move to Location 1, Data Collection Time: 3.63
+Reward: -36.37
+Done: False
+-----
+Time Step: 4
+Current Location: 3
+Remaining Time: 204.32156914917297
+Visited Locations: [0, 2, 5, 1, 3]
+Weather: Good
+Total Reward: -41.56430250924811
+-----
+Action: Move to Location 3, Data Collection Time: 4.85
+Reward: -5.15
+Done: False
+-----
+Time Step: 5
+Current Location: 4
+Remaining Time: 190.26893565235008
+Visited Locations: [0, 2, 5, 1, 3, 4]
+Weather: Bad
+Total Reward: -10015.090601037842
+-----
+Action: Move to Location 4, Data Collection Time: 4.05
+Reward: -9973.53
+Done: True
+-----
+Episode 3 finished.
+Total Reward: -10015.09
+Final Location: 4
+Visited Locations: [0, 2, 5, 1, 3, 4]
+
+==================================================
+
+Episode 4
+==============================
+Time Step: 1
+Current Location: 4
+Remaining Time: 270.89143979994185
+Visited Locations: [0, 4]
+Weather: Good
+Total Reward: 11.977041800523129
+-----
+Action: Move to Location 4, Data Collection Time: 4.11
+Reward: 11.98
+Done: False
+-----
+Time Step: 2
+Current Location: 0
+Remaining Time: 220.89143979994185
+Visited Locations: [0, 4, 0]
+Weather: Bad
+Total Reward: -38.022958199476875
+-----
+Action: Move to Location 0, Data Collection Time: 0.00
+Reward: -50.00
+Done: True
+-----
+Episode 4 finished.
+Total Reward: -38.02
+Final Location: 0
+Visited Locations: [0, 4, 0]
+
+==================================================
+
+Episode 5
+==============================
+Time Step: 1
+Current Location: 1
+Remaining Time: 277.7291645858823
+Visited Locations: [0, 1]
+Weather: Bad
+Total Reward: -17.72916458588228
+-----
+Action: Move to Location 1, Data Collection Time: 2.27
+Reward: -17.73
+Done: False
+-----
+Time Step: 2
+Current Location: 5
+Remaining Time: 253.10493808700176
+Visited Locations: [0, 1, 5]
+Weather: Good
+Total Reward: -33.104938087001734
+-----
+Action: Move to Location 5, Data Collection Time: 4.62
+Reward: -15.38
+Done: False
+-----
+Time Step: 3
+Current Location: 4
+Remaining Time: 239.058406311139
+Visited Locations: [0, 1, 5, 4]
+Weather: Bad
+Total Reward: -6.686152104236914
+-----
+Action: Move to Location 4, Data Collection Time: 4.05
+Reward: 26.42
+Done: False
+-----
+Time Step: 4
+Current Location: 2
+Remaining Time: 214.5126471438916
+Visited Locations: [0, 1, 5, 4, 2]
+Weather: Bad
+Total Reward: 14.225680400989688
+-----
+Action: Move to Location 2, Data Collection Time: 4.55
+Reward: 20.91
+Done: False
+-----
+Time Step: 5
+Current Location: 0
+Remaining Time: 184.5126471438916
+Visited Locations: [0, 1, 5, 4, 2, 0]
+Weather: Bad
+Total Reward: -15.774319599010312
+-----
+Action: Move to Location 0, Data Collection Time: 0.00
+Reward: -30.00
+Done: True
+-----
+Episode 5 finished.
+Total Reward: -15.77
+Final Location: 0
+Visited Locations: [0, 1, 5, 4, 2, 0]
+
+==================================================
+

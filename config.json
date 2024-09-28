@@ -1,6 +1,6 @@
 {
   "num_locations": 5,
-  "T_max": 100,
+  "T_max": 300,
   "weather_prob": 0.4,
   "P_penalty": 10000,
   "T_flight_good": [

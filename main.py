@@ -44,8 +44,8 @@ def main():
                     weather = state['weather']
                     
                     # Choose a random unvisited location or return home
-                    unvisited = np.where(visited == 0)[0]
-                    if len(unvisited) == 0 or remaining_time <= 0:
+                    unvisited = np.where(np.logical_or(visited == 0, np.arange(len(visited)) == 0))[0]
+                    if len(unvisited) == 1 or remaining_time <= 0:  # Only home is left or out of time
                         next_location = 0  # Return home
                     else:
                         next_location = np.random.choice(unvisited)
