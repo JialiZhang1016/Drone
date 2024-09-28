@@ -1,8 +1,6 @@
 import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
-import json
-import torch
 
 class DroneRoutePlanningEnv(gym.Env):
     metadata = {'render.modes': ['human']}
@@ -63,9 +61,21 @@ class DroneRoutePlanningEnv(gym.Env):
         if self.done:
             raise RuntimeError("Episode has finished. Call reset() to start a new episode.")
         
-        L_next, T_data_next = action
-        L_next = int(L_next)  
-        T_data_next = float(T_data_next)
+        # Check safety factor: if remaining time <= 20% T_max and not at Home, force return Home
+        if self.T_t_rem <= 0.2 * self.T_max and self.L_t != 0:
+            self.logger.info("Remaining time <= 20%. Forcing drone to return Home.")
+            L_next = 0
+            T_data_next = 0.0
+        else:
+            L_next, T_data_next = action
+            L_next = int(L_next)
+            T_data_next = float(T_data_next)
+        
+            # If all locations are visited, force return Home
+            if np.all(self.V_t[1:] == 1) and L_next != 0:
+                self.logger.info("All locations visited. Forcing drone to return Home.")
+                L_next = 0
+                T_data_next = 0.0
         
         # Validate action constraints
         if not self._is_valid_action(L_next, T_data_next):
@@ -106,7 +116,23 @@ class DroneRoutePlanningEnv(gym.Env):
     
         self.timestep += 1
         
-        return self._get_observation(), reward, self.done, {}
+        info = {
+            'action': {
+                'next_location': int(L_next),
+                'data_collection_time': round(float(T_data_next), 2)
+            },
+            'next_state': {
+                'current_location': int(self.L_t),
+                'remaining_time': round(float(self.T_t_rem), 2),
+                'visited': self.V_t.tolist(),
+                'weather': 'Good' if self.W_t == 0 else 'Bad'
+            },
+            'reward': round(float(reward), 2),
+            'total_reward': round(float(self.total_reward), 2),
+            'visited_locations': self.visit_order
+        }
+
+        return self._get_observation(), reward, self.done, info
     
     def _get_observation(self):
         observation = {
@@ -177,11 +203,56 @@ class DroneRoutePlanningEnv(gym.Env):
             return True
         return False
 
-    def render(self, mode='human'):
-        print(f"Time Step: {self.timestep}")
+    def render(self, mode='human'):   
         print(f"Current Location: {self.L_t}")
         print(f"Remaining Time: {self.T_t_rem}")
         print(f"Visited Locations: {self.visit_order}")
         print(f"Weather: {'Good' if self.W_t == 0 else 'Bad'}")
+        print(f"Step Reward: {self.reward}")
         print(f"Total Reward: {self.total_reward}")
         print("-----")
+
+class RandomAgent:
+    """
+    An agent that selects a random action from the environment.
+    """
+
+    def __init__(self, env):
+        """
+        Initialize the random agent.
+        """
+        self.env = env
+
+    def select_action(self, observation):
+        """
+        Select a valid random action based on the current observation.
+        """
+        current_location = observation['current_location']
+        remaining_time = observation['remaining_time'][0]
+        visited = observation['visited']
+        weather = observation['weather']
+
+        # Get all unvisited locations, including Home (location number 0)
+        unvisited = np.where(np.logical_or(visited == 0, np.arange(len(visited)) == 0))[0]
+
+        # Decide the next location
+        if len(unvisited) == 1 or remaining_time <= 0:
+            # Only Home is left or out of time
+            next_location = 0
+        else:
+            # Randomly select an unvisited location
+            next_location = np.random.choice(unvisited)
+
+        # Determine the data collection time based on the selected location
+        T_data_min = self.env.T_data_lower[next_location]
+        T_data_max = self.env.T_data_upper[next_location]
+
+        if T_data_min == 0 and T_data_max == 0:
+            # If selecting to return Home, data collection time is 0
+            T_data_next = 0.0
+        else:
+            # Randomly select a data collection time within the allowed range
+            T_data_next = np.random.uniform(T_data_min, T_data_max)
+
+        return (int(next_location), float(T_data_next))
+

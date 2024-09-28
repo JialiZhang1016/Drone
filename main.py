@@ -1,76 +1,59 @@
 import json
-import numpy as np
 import os
-from drone_env import DroneRoutePlanningEnv
+from drone_env import DroneRoutePlanningEnv, RandomAgent
 import contextlib
 
 def main():
-    # Define output directory
+    # Define the output directory
     output_dir = 'outputs'
-    
-    # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
-    
+
     # Get the next available file number
     existing_files = [f for f in os.listdir(output_dir) if f.startswith('env_test') and f.endswith('.txt')]
     next_number = max([int(f.split('_')[2].split('.')[0]) for f in existing_files], default=0) + 1
     output_filename = os.path.join(output_dir, f'env_test_{next_number}.txt')
-    
-    # Open output file and redirect stdout
+
+    # Open the output file and redirect stdout
     with open(output_filename, 'w') as f:
         with contextlib.redirect_stdout(f):
             # Load configuration from JSON file
             with open('config.json', 'r') as config_file:
                 config = json.load(config_file)
-            
-            # Create environment
+
+            # Create environment and agent instances
             env = DroneRoutePlanningEnv(config)
-            
-            max_episodes = 5  # You can adjust this number
+            agent = RandomAgent(env)
+
+            max_episodes = 5  # Adjust this value as needed
 
             for episode in range(max_episodes):
                 state = env.reset()
                 done = False
-                episode_reward = 0
-                
+
                 print(f"Episode {episode + 1}")
                 print("=" * 30)
-                
+
                 while not done:
-                    # Get current observation
-                    current_location = state['current_location']
-                    remaining_time = state['remaining_time'][0]
-                    visited = state['visited']
-                    weather = state['weather']
+                    action = agent.select_action(state)
+                    state, reward, done, info = env.step(action)
                     
-                    # Choose a random unvisited location or return home
-                    unvisited = np.where(np.logical_or(visited == 0, np.arange(len(visited)) == 0))[0]
-                    if len(unvisited) == 1 or remaining_time <= 0:  # Only home is left or out of time
-                        next_location = 0  # Return home
-                    else:
-                        next_location = np.random.choice(unvisited)
-                    
-                    # Choose a random data collection time within bounds
-                    T_data_min = env.T_data_lower[next_location]
-                    T_data_max = env.T_data_upper[next_location]
-                    T_data_next = np.random.uniform(T_data_min, T_data_max)
-                    
-                    action = (next_location, T_data_next)
-                    
-                    # Take action in the environment
-                    state, reward, done, _ = env.step(action)
-                    episode_reward += reward
-                    
-                    # Render current state
-                    env.render()
-                    
-                    # Print action and reward information
-                    print(f"Action: Move to Location {next_location}, Data Collection Time: {T_data_next:.2f}")
-                    print(f"Reward: {reward:.2f}")
-                    print(f"Done: {done}")
+                    # Print the info dictionary in a clear format
+                    print("Action:")
+                    print(f"  Next Location: {info['action']['next_location']}")
+                    print(f"  Data Collection Time: {info['action']['data_collection_time']:.2f}")
+                    print("Next State:")
+                    print(f"  Current Location: {info['next_state']['current_location']}")
+                    print(f"  Remaining Time: {info['next_state']['remaining_time']:.2f}")
+                    print(f"  Visited: {info['next_state']['visited']}")
+                    print(f"  Weather: {info['next_state']['weather']}")
+                    print(f"Reward: {info['reward']:.2f}")
+                    print(f"Total Reward: {info['total_reward']:.2f}")
+                    print(f"Visited Locations: {info['visited_locations']}")
                     print("-----")
 
+                episode_reward = env.total_reward
                 # Print episode summary
+                print("\n" + "=" * 50 + "\n")
                 print(f"Episode {episode + 1} finished.")
                 print(f"Total Reward: {episode_reward:.2f}")
                 print(f"Final Location: {env.L_t}")

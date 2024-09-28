@@ -1,6 +1,6 @@
 {
   "num_locations": 5,
-  "T_max": 300,
+  "T_max": 400,
   "weather_prob": 0.4,
   "P_penalty": 10000,
   "T_flight_good": [
@@ -19,7 +19,7 @@
     [50, 30, 20, 10, 0, 10],
     [60, 40, 30, 20, 10, 0]
   ],
-  "T_data_lower": [0, 2, 2, 2, 2, 2],
-  "T_data_upper": [0, 5, 5, 5, 5, 5],
+  "T_data_lower": [0, 20, 20, 20, 20, 20],
+  "T_data_upper": [0, 50, 50, 50, 50, 50],
   "criticality": ["HC", "LC", "HC", "LC", "HC", "LC"]
 }

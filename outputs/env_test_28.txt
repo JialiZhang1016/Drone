@@ -1,0 +1,104 @@
+Episode 1
+==============================
+{'action': {'next_location': 4, 'data_collection_time': 42.34}, 'next_state': {'current_location': 4, 'remaining_time': 307.66, 'visited': [1, 0, 0, 0, 1, 0], 'weather': 'Bad'}, 'reward': 331.1, 'total_reward': 331.1, 'visited_locations': [0, 4]}
+-----
+{'action': {'next_location': 2, 'data_collection_time': 27.89}, 'next_state': {'current_location': 2, 'remaining_time': 269.76, 'visited': [1, 0, 1, 0, 1, 0], 'weather': 'Good'}, 'reward': 241.05, 'total_reward': 572.15, 'visited_locations': [0, 4, 2]}
+-----
+{'action': {'next_location': 3, 'data_collection_time': 34.93}, 'next_state': {'current_location': 3, 'remaining_time': 229.84, 'visited': [1, 0, 1, 1, 1, 0], 'weather': 'Good'}, 'reward': 29.93, 'total_reward': 602.08, 'visited_locations': [0, 4, 2, 3]}
+-----
+{'action': {'next_location': 1, 'data_collection_time': 28.8}, 'next_state': {'current_location': 1, 'remaining_time': 181.04, 'visited': [1, 1, 1, 1, 1, 0], 'weather': 'Bad'}, 'reward': 8.8, 'total_reward': 610.87, 'visited_locations': [0, 4, 2, 3, 1]}
+-----
+{'action': {'next_location': 0, 'data_collection_time': 0.0}, 'next_state': {'current_location': 0, 'remaining_time': 171.04, 'visited': [1, 1, 1, 1, 1, 0], 'weather': 'Good'}, 'reward': -10.0, 'total_reward': 600.87, 'visited_locations': [0, 4, 2, 3, 1, 0]}
+-----
+
+==================================================
+
+Episode 1 finished.
+Total Reward: 600.87
+Final Location: 0
+Visited Locations: [0, 4, 2, 3, 1, 0]
+
+==================================================
+
+Episode 2
+==============================
+{'action': {'next_location': 5, 'data_collection_time': 30.66}, 'next_state': {'current_location': 5, 'remaining_time': 309.34, 'visited': [1, 0, 0, 0, 0, 1], 'weather': 'Bad'}, 'reward': -29.34, 'total_reward': -29.34, 'visited_locations': [0, 5]}
+-----
+{'action': {'next_location': 3, 'data_collection_time': 22.8}, 'next_state': {'current_location': 3, 'remaining_time': 266.54, 'visited': [1, 0, 0, 1, 0, 1], 'weather': 'Bad'}, 'reward': 2.8, 'total_reward': -26.54, 'visited_locations': [0, 5, 3]}
+-----
+{'action': {'next_location': 1, 'data_collection_time': 30.23}, 'next_state': {'current_location': 1, 'remaining_time': 216.32, 'visited': [1, 1, 0, 1, 0, 1], 'weather': 'Bad'}, 'reward': 10.23, 'total_reward': -16.32, 'visited_locations': [0, 5, 3, 1]}
+-----
+{'action': {'next_location': 4, 'data_collection_time': 31.96}, 'next_state': {'current_location': 4, 'remaining_time': 154.36, 'visited': [1, 1, 0, 1, 1, 1], 'weather': 'Bad'}, 'reward': 257.63, 'total_reward': 241.31, 'visited_locations': [0, 5, 3, 1, 4]}
+-----
+{'action': {'next_location': 2, 'data_collection_time': 26.26}, 'next_state': {'current_location': 2, 'remaining_time': 118.1, 'visited': [1, 1, 1, 1, 1, 1], 'weather': 'Good'}, 'reward': -9773.7, 'total_reward': -9532.39, 'visited_locations': [0, 5, 3, 1, 4, 2]}
+-----
+
+==================================================
+
+Episode 2 finished.
+Total Reward: -9532.39
+Final Location: 2
+Visited Locations: [0, 5, 3, 1, 4, 2]
+
+==================================================
+
+Episode 3
+==============================
+{'action': {'next_location': 4, 'data_collection_time': 42.96}, 'next_state': {'current_location': 4, 'remaining_time': 332.04, 'visited': [1, 0, 0, 0, 1, 0], 'weather': 'Good'}, 'reward': 361.6, 'total_reward': 361.6, 'visited_locations': [0, 4]}
+-----
+{'action': {'next_location': 5, 'data_collection_time': 48.74}, 'next_state': {'current_location': 5, 'remaining_time': 278.31, 'visited': [1, 0, 0, 0, 1, 1], 'weather': 'Good'}, 'reward': 43.74, 'total_reward': 405.33, 'visited_locations': [0, 4, 5]}
+-----
+{'action': {'next_location': 3, 'data_collection_time': 33.86}, 'next_state': {'current_location': 3, 'remaining_time': 224.45, 'visited': [1, 0, 0, 1, 1, 1], 'weather': 'Bad'}, 'reward': 13.86, 'total_reward': 419.19, 'visited_locations': [0, 4, 5, 3]}
+-----
+{'action': {'next_location': 0, 'data_collection_time': 0.0}, 'next_state': {'current_location': 0, 'remaining_time': 184.45, 'visited': [1, 0, 0, 1, 1, 1], 'weather': 'Bad'}, 'reward': -40.0, 'total_reward': 379.19, 'visited_locations': [0, 4, 5, 3, 0]}
+-----
+
+==================================================
+
+Episode 3 finished.
+Total Reward: 379.19
+Final Location: 0
+Visited Locations: [0, 4, 5, 3, 0]
+
+==================================================
+
+Episode 4
+==============================
+{'action': {'next_location': 4, 'data_collection_time': 26.08}, 'next_state': {'current_location': 4, 'remaining_time': 348.92, 'visited': [1, 0, 0, 0, 1, 0], 'weather': 'Good'}, 'reward': 209.71, 'total_reward': 209.71, 'visited_locations': [0, 4]}
+-----
+{'action': {'next_location': 3, 'data_collection_time': 31.7}, 'next_state': {'current_location': 3, 'remaining_time': 312.22, 'visited': [1, 0, 0, 1, 1, 0], 'weather': 'Good'}, 'reward': 26.7, 'total_reward': 236.41, 'visited_locations': [0, 4, 3]}
+-----
+{'action': {'next_location': 5, 'data_collection_time': 30.73}, 'next_state': {'current_location': 5, 'remaining_time': 261.49, 'visited': [1, 0, 0, 1, 1, 1], 'weather': 'Bad'}, 'reward': 10.73, 'total_reward': 247.14, 'visited_locations': [0, 4, 3, 5]}
+-----
+{'action': {'next_location': 0, 'data_collection_time': 0.0}, 'next_state': {'current_location': 0, 'remaining_time': 201.49, 'visited': [1, 0, 0, 1, 1, 1], 'weather': 'Bad'}, 'reward': -60.0, 'total_reward': 187.14, 'visited_locations': [0, 4, 3, 5, 0]}
+-----
+
+==================================================
+
+Episode 4 finished.
+Total Reward: 187.14
+Final Location: 0
+Visited Locations: [0, 4, 3, 5, 0]
+
+==================================================
+
+Episode 5
+==============================
+{'action': {'next_location': 5, 'data_collection_time': 34.21}, 'next_state': {'current_location': 5, 'remaining_time': 305.79, 'visited': [1, 0, 0, 0, 0, 1], 'weather': 'Bad'}, 'reward': -25.79, 'total_reward': -25.79, 'visited_locations': [0, 5]}
+-----
+{'action': {'next_location': 3, 'data_collection_time': 39.8}, 'next_state': {'current_location': 3, 'remaining_time': 255.99, 'visited': [1, 0, 0, 1, 0, 1], 'weather': 'Good'}, 'reward': 29.8, 'total_reward': 4.01, 'visited_locations': [0, 5, 3]}
+-----
+{'action': {'next_location': 2, 'data_collection_time': 42.39}, 'next_state': {'current_location': 2, 'remaining_time': 203.61, 'visited': [1, 0, 1, 1, 0, 1], 'weather': 'Bad'}, 'reward': 371.48, 'total_reward': 375.49, 'visited_locations': [0, 5, 3, 2]}
+-----
+{'action': {'next_location': 0, 'data_collection_time': 0.0}, 'next_state': {'current_location': 0, 'remaining_time': 173.61, 'visited': [1, 0, 1, 1, 0, 1], 'weather': 'Bad'}, 'reward': -30.0, 'total_reward': 345.49, 'visited_locations': [0, 5, 3, 2, 0]}
+-----
+
+==================================================
+
+Episode 5 finished.
+Total Reward: 345.49
+Final Location: 0
+Visited Locations: [0, 5, 3, 2, 0]
+
+==================================================
+

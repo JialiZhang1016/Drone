@@ -1,0 +1,100 @@
+Episode 1
+==============================
+{'action': (3, 44.38911319242587), 'next_state': {'current_location': 3, 'remaining_time': array([335.6109], dtype=float32), 'visited': array([1, 0, 0, 1, 0, 0], dtype=int8), 'weather': np.int64(0)}, 'reward': np.float64(24.389113192425867), 'total_reward': np.float64(24.389113192425867), 'visited_locations': [0, 3]}
+-----
+{'action': (5, 43.518298655660786), 'next_state': {'current_location': 5, 'remaining_time': array([282.0926], dtype=float32), 'visited': array([1, 0, 0, 1, 0, 1], dtype=int8), 'weather': np.int64(0)}, 'reward': np.float64(33.518298655660786), 'total_reward': np.float64(57.90741184808665), 'visited_locations': [0, 3, 5]}
+-----
+{'action': (2, 46.48689009943577), 'next_state': {'current_location': 2, 'remaining_time': array([205.6057], dtype=float32), 'visited': array([1, 0, 1, 1, 0, 1], dtype=int8), 'weather': np.int64(1)}, 'reward': np.float64(388.3820108949219), 'total_reward': np.float64(446.2894227430086), 'visited_locations': [0, 3, 5, 2]}
+-----
+{'action': (0, 0.0), 'next_state': {'current_location': 0, 'remaining_time': array([175.6057], dtype=float32), 'visited': array([1, 0, 1, 1, 0, 1], dtype=int8), 'weather': np.int64(1)}, 'reward': np.float64(-30.0), 'total_reward': np.float64(416.2894227430086), 'visited_locations': [0, 3, 5, 2, 0]}
+-----
+
+==================================================
+
+Episode 1 finished.
+Total Reward: 416.29
+Final Location: 0
+Visited Locations: [0, 3, 5, 2, 0]
+
+==================================================
+
+Episode 2
+==============================
+{'action': (0, 0.0), 'next_state': {'current_location': 0, 'remaining_time': array([400.], dtype=float32), 'visited': array([1, 0, 0, 0, 0, 0], dtype=int8), 'weather': np.int64(1)}, 'reward': np.float64(0.0), 'total_reward': np.float64(0.0), 'visited_locations': [0, 0]}
+-----
+{'action': (3, 41.04847379525868), 'next_state': {'current_location': 3, 'remaining_time': array([318.95154], dtype=float32), 'visited': array([1, 0, 0, 1, 0, 0], dtype=int8), 'weather': np.int64(1)}, 'reward': np.float64(1.048473795258687), 'total_reward': np.float64(1.048473795258687), 'visited_locations': [0, 0, 3]}
+-----
+{'action': (1, 21.189333843146237), 'next_state': {'current_location': 1, 'remaining_time': array([277.7622], dtype=float32), 'visited': array([1, 1, 0, 1, 0, 0], dtype=int8), 'weather': np.int64(1)}, 'reward': np.float64(1.1893338431462368), 'total_reward': np.float64(2.2378076384049237), 'visited_locations': [0, 0, 3, 1]}
+-----
+{'action': (2, 30.57541319551199), 'next_state': {'current_location': 2, 'remaining_time': array([237.18678], dtype=float32), 'visited': array([1, 1, 1, 1, 0, 0], dtype=int8), 'weather': np.int64(1)}, 'reward': np.float64(265.17871875960793), 'total_reward': np.float64(267.4165263980129), 'visited_locations': [0, 0, 3, 1, 2]}
+-----
+{'action': (4, 33.33430190759061), 'next_state': {'current_location': 4, 'remaining_time': array([193.85248], dtype=float32), 'visited': array([1, 1, 1, 1, 1, 0], dtype=int8), 'weather': np.int64(0)}, 'reward': np.float64(290.00871716831546), 'total_reward': np.float64(557.4252435663284), 'visited_locations': [0, 0, 3, 1, 2, 4]}
+-----
+{'action': (5, 34.50429750716063), 'next_state': {'current_location': 5, 'remaining_time': array([154.34818], dtype=float32), 'visited': array([1, 1, 1, 1, 1, 1], dtype=int8), 'weather': np.int64(0)}, 'reward': np.float64(-9970.495702492839), 'total_reward': np.float64(-9413.070458926511), 'visited_locations': [0, 0, 3, 1, 2, 4, 5]}
+-----
+
+==================================================
+
+Episode 2 finished.
+Total Reward: -9413.07
+Final Location: 5
+Visited Locations: [0, 0, 3, 1, 2, 4, 5]
+
+==================================================
+
+Episode 3
+==============================
+{'action': (4, 32.9208631432539), 'next_state': {'current_location': 4, 'remaining_time': array([317.07913], dtype=float32), 'visited': array([1, 0, 0, 0, 1, 0], dtype=int8), 'weather': np.int64(1)}, 'reward': np.float64(246.28776828928505), 'total_reward': np.float64(246.28776828928505), 'visited_locations': [0, 4]}
+-----
+{'action': (1, 24.13280556891194), 'next_state': {'current_location': 1, 'remaining_time': array([277.94632], dtype=float32), 'visited': array([1, 1, 0, 0, 1, 0], dtype=int8), 'weather': np.int64(0)}, 'reward': np.float64(9.132805568911941), 'total_reward': np.float64(255.420573858197), 'visited_locations': [0, 4, 1]}
+-----
+{'action': (3, 22.47281304192794), 'next_state': {'current_location': 3, 'remaining_time': array([245.47351], dtype=float32), 'visited': array([1, 1, 0, 1, 1, 0], dtype=int8), 'weather': np.int64(0)}, 'reward': np.float64(12.472813041927942), 'total_reward': np.float64(267.89338690012494), 'visited_locations': [0, 4, 1, 3]}
+-----
+{'action': (5, 36.31308016331402), 'next_state': {'current_location': 5, 'remaining_time': array([189.16043], dtype=float32), 'visited': array([1, 1, 0, 1, 1, 1], dtype=int8), 'weather': np.int64(1)}, 'reward': np.float64(16.31308016331402), 'total_reward': np.float64(284.20646706343894), 'visited_locations': [0, 4, 1, 3, 5]}
+-----
+{'action': (0, 0.0), 'next_state': {'current_location': 0, 'remaining_time': array([159.16043], dtype=float32), 'visited': array([1, 1, 0, 1, 1, 1], dtype=int8), 'weather': np.int64(0)}, 'reward': np.float64(-30.0), 'total_reward': np.float64(254.20646706343894), 'visited_locations': [0, 4, 1, 3, 5, 0]}
+-----
+
+==================================================
+
+Episode 3 finished.
+Total Reward: 254.21
+Final Location: 0
+Visited Locations: [0, 4, 1, 3, 5, 0]
+
+==================================================
+
+Episode 4
+==============================
+{'action': (1, 48.87121684042325), 'next_state': {'current_location': 1, 'remaining_time': array([331.12878], dtype=float32), 'visited': array([1, 1, 0, 0, 0, 0], dtype=int8), 'weather': np.int64(1)}, 'reward': np.float64(28.87121684042326), 'total_reward': np.float64(28.87121684042326), 'visited_locations': [0, 1]}
+-----
+{'action': (0, 0.0), 'next_state': {'current_location': 0, 'remaining_time': array([311.12878], dtype=float32), 'visited': array([1, 1, 0, 0, 0, 0], dtype=int8), 'weather': np.int64(1)}, 'reward': np.float64(-20.0), 'total_reward': np.float64(8.871216840423259), 'visited_locations': [0, 1, 0]}
+-----
+
+==================================================
+
+Episode 4 finished.
+Total Reward: 8.87
+Final Location: 0
+Visited Locations: [0, 1, 0]
+
+==================================================
+
+Episode 5
+==============================
+{'action': (5, 38.38538928655038), 'next_state': {'current_location': 5, 'remaining_time': array([331.61462], dtype=float32), 'visited': array([1, 0, 0, 0, 0, 1], dtype=int8), 'weather': np.int64(0)}, 'reward': np.float64(8.385389286550378), 'total_reward': np.float64(8.385389286550378), 'visited_locations': [0, 5]}
+-----
+{'action': (1, 20.910425239897325), 'next_state': {'current_location': 1, 'remaining_time': array([290.7042], dtype=float32), 'visited': array([1, 1, 0, 0, 0, 1], dtype=int8), 'weather': np.int64(0)}, 'reward': np.float64(0.9104252398973287), 'total_reward': np.float64(9.295814526447707), 'visited_locations': [0, 5, 1]}
+-----
+{'action': (0, 0.0), 'next_state': {'current_location': 0, 'remaining_time': array([280.7042], dtype=float32), 'visited': array([1, 1, 0, 0, 0, 1], dtype=int8), 'weather': np.int64(0)}, 'reward': np.float64(-10.0), 'total_reward': np.float64(-0.7041854735522932), 'visited_locations': [0, 5, 1, 0]}
+-----
+
+==================================================
+
+Episode 5 finished.
+Total Reward: -0.70
+Final Location: 0
+Visited Locations: [0, 5, 1, 0]
+
+==================================================
+
