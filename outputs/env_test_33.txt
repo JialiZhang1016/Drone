@@ -1,0 +1,300 @@
+Episode 1
+==============================
+Action:
+  Next Location: 2
+  Data Collection Time: 44.69
+Next State:
+  Current Location: 2
+  Remaining Time: 325.31
+  Visited: [1, 0, 1, 0, 0, 0]
+  Weather: Bad
+Reward: 372.25
+Total Reward: 372.25
+Visited Locations: [0, 2]
+-----
+Action:
+  Next Location: 0
+  Data Collection Time: 0.00
+Next State:
+  Current Location: 0
+  Remaining Time: 295.31
+  Visited: [1, 0, 1, 0, 0, 0]
+  Weather: Bad
+Reward: -30.00
+Total Reward: 342.25
+Visited Locations: [0, 2, 0]
+-----
+
+==================================================
+
+Episode 1 finished.
+Total Reward: 342.25
+Final Location: 0
+Visited Locations: [0, 2, 0]
+
+==================================================
+
+Episode 2
+==============================
+Action:
+  Next Location: 1
+  Data Collection Time: 35.97
+Next State:
+  Current Location: 1
+  Remaining Time: 344.03
+  Visited: [1, 1, 0, 0, 0, 0]
+  Weather: Bad
+Reward: 15.97
+Total Reward: 15.97
+Visited Locations: [0, 1]
+-----
+Action:
+  Next Location: 4
+  Data Collection Time: 42.45
+Next State:
+  Current Location: 4
+  Remaining Time: 286.58
+  Visited: [1, 1, 0, 0, 1, 0]
+  Weather: Good
+Reward: 367.03
+Total Reward: 383.00
+Visited Locations: [0, 1, 4]
+-----
+Action:
+  Next Location: 5
+  Data Collection Time: 47.77
+Next State:
+  Current Location: 5
+  Remaining Time: 228.81
+  Visited: [1, 1, 0, 0, 1, 1]
+  Weather: Bad
+Reward: 37.77
+Total Reward: 420.77
+Visited Locations: [0, 1, 4, 5]
+-----
+Action:
+  Next Location: 0
+  Data Collection Time: 0.00
+Next State:
+  Current Location: 0
+  Remaining Time: 168.81
+  Visited: [1, 1, 0, 0, 1, 1]
+  Weather: Bad
+Reward: -60.00
+Total Reward: 360.77
+Visited Locations: [0, 1, 4, 5, 0]
+-----
+
+==================================================
+
+Episode 2 finished.
+Total Reward: 360.77
+Final Location: 0
+Visited Locations: [0, 1, 4, 5, 0]
+
+==================================================
+
+Episode 3
+==============================
+Action:
+  Next Location: 0
+  Data Collection Time: 0.00
+Next State:
+  Current Location: 0
+  Remaining Time: 400.00
+  Visited: [1, 0, 0, 0, 0, 0]
+  Weather: Good
+Reward: 0.00
+Total Reward: 0.00
+Visited Locations: [0, 0]
+-----
+Action:
+  Next Location: 3
+  Data Collection Time: 39.23
+Next State:
+  Current Location: 3
+  Remaining Time: 340.77
+  Visited: [1, 0, 0, 1, 0, 0]
+  Weather: Good
+Reward: 19.23
+Total Reward: 19.23
+Visited Locations: [0, 0, 3]
+-----
+Action:
+  Next Location: 1
+  Data Collection Time: 37.06
+Next State:
+  Current Location: 1
+  Remaining Time: 293.70
+  Visited: [1, 1, 0, 1, 0, 0]
+  Weather: Good
+Reward: 27.06
+Total Reward: 46.30
+Visited Locations: [0, 0, 3, 1]
+-----
+Action:
+  Next Location: 2
+  Data Collection Time: 48.97
+Next State:
+  Current Location: 2
+  Remaining Time: 234.73
+  Visited: [1, 1, 1, 1, 0, 0]
+  Weather: Bad
+Reward: 430.76
+Total Reward: 477.06
+Visited Locations: [0, 0, 3, 1, 2]
+-----
+Action:
+  Next Location: 5
+  Data Collection Time: 45.23
+Next State:
+  Current Location: 5
+  Remaining Time: 174.50
+  Visited: [1, 1, 1, 1, 0, 1]
+  Weather: Good
+Reward: 30.23
+Total Reward: 507.29
+Visited Locations: [0, 0, 3, 1, 2, 5]
+-----
+Action:
+  Next Location: 0
+  Data Collection Time: 0.00
+Next State:
+  Current Location: 0
+  Remaining Time: 144.50
+  Visited: [1, 1, 1, 1, 0, 1]
+  Weather: Good
+Reward: -30.00
+Total Reward: 477.29
+Visited Locations: [0, 0, 3, 1, 2, 5, 0]
+-----
+
+==================================================
+
+Episode 3 finished.
+Total Reward: 477.29
+Final Location: 0
+Visited Locations: [0, 0, 3, 1, 2, 5, 0]
+
+==================================================
+
+Episode 4
+==============================
+Action:
+  Next Location: 3
+  Data Collection Time: 45.23
+Next State:
+  Current Location: 3
+  Remaining Time: 334.77
+  Visited: [1, 0, 0, 1, 0, 0]
+  Weather: Good
+Reward: 25.23
+Total Reward: 25.23
+Visited Locations: [0, 3]
+-----
+Action:
+  Next Location: 2
+  Data Collection Time: 21.38
+Next State:
+  Current Location: 2
+  Remaining Time: 308.39
+  Visited: [1, 0, 1, 1, 0, 0]
+  Weather: Good
+Reward: 187.41
+Total Reward: 212.64
+Visited Locations: [0, 3, 2]
+-----
+Action:
+  Next Location: 0
+  Data Collection Time: 0.00
+Next State:
+  Current Location: 0
+  Remaining Time: 278.39
+  Visited: [1, 0, 1, 1, 0, 0]
+  Weather: Bad
+Reward: -30.00
+Total Reward: 182.64
+Visited Locations: [0, 3, 2, 0]
+-----
+
+==================================================
+
+Episode 4 finished.
+Total Reward: 182.64
+Final Location: 0
+Visited Locations: [0, 3, 2, 0]
+
+==================================================
+
+Episode 5
+==============================
+Action:
+  Next Location: 5
+  Data Collection Time: 43.82
+Next State:
+  Current Location: 5
+  Remaining Time: 326.18
+  Visited: [1, 0, 0, 0, 0, 1]
+  Weather: Good
+Reward: 13.82
+Total Reward: 13.82
+Visited Locations: [0, 5]
+-----
+Action:
+  Next Location: 2
+  Data Collection Time: 44.38
+Next State:
+  Current Location: 2
+  Remaining Time: 266.80
+  Visited: [1, 0, 1, 0, 0, 1]
+  Weather: Good
+Reward: 384.44
+Total Reward: 398.26
+Visited Locations: [0, 5, 2]
+-----
+Action:
+  Next Location: 3
+  Data Collection Time: 42.27
+Next State:
+  Current Location: 3
+  Remaining Time: 219.52
+  Visited: [1, 0, 1, 1, 0, 1]
+  Weather: Good
+Reward: 37.27
+Total Reward: 435.53
+Visited Locations: [0, 5, 2, 3]
+-----
+Action:
+  Next Location: 1
+  Data Collection Time: 21.12
+Next State:
+  Current Location: 1
+  Remaining Time: 178.41
+  Visited: [1, 1, 1, 1, 0, 1]
+  Weather: Bad
+Reward: 1.12
+Total Reward: 436.65
+Visited Locations: [0, 5, 2, 3, 1]
+-----
+Action:
+  Next Location: 4
+  Data Collection Time: 33.74
+Next State:
+  Current Location: 4
+  Remaining Time: 114.67
+  Visited: [1, 1, 1, 1, 1, 1]
+  Weather: Bad
+Reward: -9726.31
+Total Reward: -9289.66
+Visited Locations: [0, 5, 2, 3, 1, 4]
+-----
+
+==================================================
+
+Episode 5 finished.
+Total Reward: -9289.66
+Final Location: 4
+Visited Locations: [0, 5, 2, 3, 1, 4]
+
+==================================================
+
