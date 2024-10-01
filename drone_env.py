@@ -42,7 +42,9 @@ class DroneRoutePlanningEnv(gym.Env):
         # Initialize state variables
         self.reset()
     
-    def reset(self):
+    def reset(self, seed=None, options=None):
+        super().reset(seed=seed)  # This line resets the RNG of the environment
+        
         self.L_t = 0  # Start at Home
         self.T_t_rem = self.T_max
         self.V_t = np.zeros(self.m + 1, dtype=np.int8)  # Visited locations
@@ -55,7 +57,7 @@ class DroneRoutePlanningEnv(gym.Env):
         self.total_reward = 0.0
         self.timestep = 0
         
-        return self._get_observation()
+        return self._get_observation(), {}  # Return observation and an empty info dict
     
     def step(self, action):
         if self.done:
@@ -63,7 +65,6 @@ class DroneRoutePlanningEnv(gym.Env):
         
         # Check safety factor: if remaining time <= 20% T_max and not at Home, force return Home
         if self.T_t_rem <= 0.2 * self.T_max and self.L_t != 0:
-            self.logger.info("Remaining time <= 20%. Forcing drone to return Home.")
             L_next = 0
             T_data_next = 0.0
         else:
@@ -73,7 +74,6 @@ class DroneRoutePlanningEnv(gym.Env):
         
             # If all locations are visited, force return Home
             if np.all(self.V_t[1:] == 1) and L_next != 0:
-                self.logger.info("All locations visited. Forcing drone to return Home.")
                 L_next = 0
                 T_data_next = 0.0
         
@@ -102,6 +102,7 @@ class DroneRoutePlanningEnv(gym.Env):
         # Update visit order
         self.visit_order.append(L_next)
         
+        observation = self._get_observation()
         # Calculate reward
         reward = self._calculate_reward(L_next, T_data_next, T_flight_to_next)
         self.total_reward += reward
@@ -131,8 +132,8 @@ class DroneRoutePlanningEnv(gym.Env):
             'total_reward': round(float(self.total_reward), 2),
             'visited_locations': self.visit_order
         }
-
-        return self._get_observation(), reward, self.done, info
+        truncated = False
+        return observation, reward, self.done, info
     
     def _get_observation(self):
         observation = {
