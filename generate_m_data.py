@@ -78,13 +78,13 @@ def generate_config(
     # generate JSON string in custom format
     json_data = custom_json_dumps(config)
 
-    # Ensure the outputs directory exists
-    outputs_dir = "outputs"
-    os.makedirs(outputs_dir, exist_ok=True)
+    # Ensure the config directory exists
+    config_dir = "config"
+    os.makedirs(config_dir, exist_ok=True)
 
-    # save JSON data to file in the outputs folder
+    # save JSON data to file in the config folder
     filename = f"config_{num_locations}.json"
-    filepath = os.path.join(outputs_dir, filename)
+    filepath = os.path.join(config_dir, filename)
     with open(filepath, "w") as f:
         f.write(json_data)
 
