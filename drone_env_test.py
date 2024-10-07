@@ -1,9 +1,11 @@
 import json
 import os
-from drone_env import DroneRoutePlanningEnv, RandomAgent
+from drone_env import DroneRoutePlanningEnv
 import contextlib
+import argparse
+from random_agent import RandomAgent
 
-def main():
+def main(config_file):
     # Define the output directory
     output_dir = 'outputs'
     os.makedirs(output_dir, exist_ok=True)
@@ -16,9 +18,9 @@ def main():
     # Open the output file and redirect stdout
     with open(output_filename, 'w') as f:
         with contextlib.redirect_stdout(f):
-            # Load configuration from JSON file
-            with open('config.json', 'r') as config_file:
-                config = json.load(config_file)
+            # Load configuration from the specified JSON file
+            with open(config_file, 'r') as cf:
+                config = json.load(cf)
 
             # Create environment and agent instances
             env = DroneRoutePlanningEnv(config)
@@ -27,7 +29,7 @@ def main():
             max_episodes = 5  # Adjust this value as needed
 
             for episode in range(max_episodes):
-                state = env.reset()
+                state, _ = env.reset()
                 done = False
 
                 print(f"Episode {episode + 1}")
@@ -35,7 +37,7 @@ def main():
 
                 while not done:
                     action = agent.select_action(state)
-                    state, reward, done, _, info = env.step(action)
+                    state, reward, done, info = env.step(action)
                     
                     # Print the info dictionary in a clear format
                     print("Action:")
@@ -63,4 +65,8 @@ def main():
     print(f"Results have been written to {output_filename}")
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Run drone environment test with specified config file.")
+    parser.add_argument('config_file', type=str, help='Path to the configuration JSON file')
+    args = parser.parse_args()
+
+    main(args.config_file)
