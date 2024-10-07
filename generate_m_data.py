@@ -1,5 +1,6 @@
 import json
 import random
+import os
 
 def generate_config(
     num_locations=5,
@@ -77,11 +78,17 @@ def generate_config(
     # generate JSON string in custom format
     json_data = custom_json_dumps(config)
 
-    # save JSON data to file
+    # Ensure the outputs directory exists
+    outputs_dir = "outputs"
+    os.makedirs(outputs_dir, exist_ok=True)
+
+    # save JSON data to file in the outputs folder
     filename = f"config_{num_locations}.json"
-    with open(filename, "w") as f:
+    filepath = os.path.join(outputs_dir, filename)
+    with open(filepath, "w") as f:
         f.write(json_data)
 
-    print(f"config saved to {filename}")
+    print(f"Config saved to {filepath}")
+
 # example usage:
-generate_config(num_locations=7, T_max=600, weather_prob=0.4, P_penalty=10000)
+generate_config(num_locations=15, T_max=600, weather_prob=0.4, P_penalty=10000)
