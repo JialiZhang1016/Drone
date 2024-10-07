@@ -6,7 +6,7 @@ import torch
 import numpy as np
 
 # 加载配置文件
-with open('config.json', 'r') as config_file:
+with open('config/config_5.json', 'r') as config_file:
     config = json.load(config_file) 
 
 # 创建环境
@@ -16,7 +16,7 @@ env = DroneRoutePlanningEnv(config)
 agent = DQNAgent(env)
 
 # 加载训练好的模型参数
-agent.policy_net.load_state_dict(torch.load('policy_net.pth'))
+agent.policy_net.load_state_dict(torch.load('runs/5_500_20241007-003429/policy_net.pth'))
 agent.policy_net.eval()
 
 num_episodes = 10  # 评估 10 个 Episode

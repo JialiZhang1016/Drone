@@ -91,4 +91,4 @@ def generate_config(
     print(f"Config saved to {filepath}")
 
 # example usage:
-generate_config(num_locations=15, T_max=600, weather_prob=0.4, P_penalty=10000)
+generate_config(num_locations=5, T_max=400, weather_prob=0.4, P_penalty=10000)

@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import os
 import sys
 
+# python plot_results.py runs/5_500_20241007-004833 
+
 # 获取结果目录路径
 if len(sys.argv) > 1:
     results_dir = sys.argv[1]
