@@ -132,7 +132,6 @@ class DroneRoutePlanningEnv(gym.Env):
             'total_reward': round(float(self.total_reward), 2),
             'visited_locations': self.visit_order
         }
-        truncated = False
         return observation, reward, self.done, info
     
     def _get_observation(self):
@@ -212,48 +211,3 @@ class DroneRoutePlanningEnv(gym.Env):
         print(f"Step Reward: {self.reward}")
         print(f"Total Reward: {self.total_reward}")
         print("-----")
-
-class RandomAgent:
-    """
-    An agent that selects a random action from the environment.
-    """
-
-    def __init__(self, env):
-        """
-        Initialize the random agent.
-        """
-        self.env = env
-
-    def select_action(self, observation):
-        """
-        Select a valid random action based on the current observation.
-        """
-        current_location = observation['current_location']
-        remaining_time = observation['remaining_time'][0]
-        visited = observation['visited']
-        weather = observation['weather']
-
-        # Get all unvisited locations, including Home (location number 0)
-        unvisited = np.where(np.logical_or(visited == 0, np.arange(len(visited)) == 0))[0]
-
-        # Decide the next location
-        if len(unvisited) == 1 or remaining_time <= 0:
-            # Only Home is left or out of time
-            next_location = 0
-        else:
-            # Randomly select an unvisited location
-            next_location = np.random.choice(unvisited)
-
-        # Determine the data collection time based on the selected location
-        T_data_min = self.env.T_data_lower[next_location]
-        T_data_max = self.env.T_data_upper[next_location]
-
-        if T_data_min == 0 and T_data_max == 0:
-            # If selecting to return Home, data collection time is 0
-            T_data_next = 0.0
-        else:
-            # Randomly select a data collection time within the allowed range
-            T_data_next = np.random.uniform(T_data_min, T_data_max)
-
-        return (int(next_location), float(T_data_next))
-
