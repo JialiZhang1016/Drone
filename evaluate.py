@@ -1,6 +1,6 @@
 import gymnasium as gym
 from drone_env import DroneRoutePlanningEnv
-from dqn_agent import DQNAgent
+from agent.dqn_agent import DQNAgent
 import json
 import torch
 import numpy as np

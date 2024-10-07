@@ -1,6 +1,6 @@
 import gymnasium as gym
 from drone_env import DroneRoutePlanningEnv
-from dqn_agent import DQNAgent
+from agent.dqn_agent import DQNAgent
 import json
 import torch
 import random
@@ -130,8 +130,7 @@ for episode in range(num_episodes):
         moving_avg_reward = sum(recent_rewards) / len(recent_rewards)
         moving_average_rewards.append(moving_avg_reward)
 
-    # print(f"Episode {episode + 1}/{num_episodes}, Total Reward: {total_reward:.2f}, "
-    #       f"Average Loss: {average_loss:.4f}, Episode Length: {steps}, Epsilon: {epsilon:.2f}")
+    print(f"Episode {episode + 1}/{num_episodes}, Total Reward: {total_reward:.2f}")
 
 # 保存模型参数
 torch.save(agent.policy_net.state_dict(), os.path.join(results_dir, 'policy_net.pth'))

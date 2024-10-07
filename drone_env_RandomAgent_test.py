@@ -3,7 +3,7 @@ import os
 from drone_env import DroneRoutePlanningEnv
 import contextlib
 import argparse
-from random_agent import RandomAgent
+from agent.random_agent import RandomAgent
 
 def main(config_file):
     # Define the output directory
@@ -65,8 +65,4 @@ def main(config_file):
     print(f"Results have been written to {output_filename}")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run drone environment test with specified config file.")
-    parser.add_argument('config_file', type=str, help='Path to the configuration JSON file')
-    args = parser.parse_args()
-
-    main(args.config_file)
+    main("config/config_5.json")
