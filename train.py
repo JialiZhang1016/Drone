@@ -27,7 +27,7 @@ env.reset(seed=seed)
 agent = DQNAgent(env)
 
 # 超参数
-num_episodes = 500
+num_episodes = 2000
 batch_size = 64
 epsilon_start = 1.0
 epsilon_end = 0.001
