@@ -28,3 +28,6 @@ secrets.json
 
 # Dependency directories
 node_modules/
+
+# Ignore the runs/ folder
+runs/
