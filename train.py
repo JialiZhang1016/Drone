@@ -22,7 +22,7 @@ def train_dqn(
     seed=42,
     success_rate_interval=10,
     moving_average_interval=20,
-    save_interval=100,
+    save_interval=1000,
     results_base_dir='runs'
 ):
     """
@@ -79,6 +79,29 @@ def train_dqn(
         f"{current_time}_{num_locations}_{num_episodes}"
     )
     os.makedirs(results_dir, exist_ok=True)
+    
+    # Save all configuration parameters
+    all_configs = {
+        "config_file": config_file,
+        "num_episodes": num_episodes,
+        "batch_size": batch_size,
+        "epsilon_start": epsilon_start,
+        "epsilon_end": epsilon_end,
+        "epsilon_decay": epsilon_decay,
+        "target_update_freq": target_update_freq,
+        "memory_size": memory_size,
+        "gamma": gamma,
+        "seed": seed,
+        "success_rate_interval": success_rate_interval,
+        "moving_average_interval": moving_average_interval,
+        "save_interval": save_interval,
+        "results_base_dir": results_base_dir,
+        "env_config": config  # Include the environment configuration
+    }
+
+    # Save all_configs to a JSON file in the results directory
+    with open(os.path.join(results_dir, 'all_configs.json'), 'w') as f:
+        json.dump(all_configs, f, indent=4)
     
     # Initialize metric lists
     all_rewards = []
@@ -160,14 +183,14 @@ def train_dqn(
 
 if __name__ == "__main__":
     train_dqn(
-        config_file='config/config_5.json',
+        config_file='config/config_5_0.4.json',
         num_episodes=5000,
         batch_size=32,
-        epsilon_start=1.0,
+        epsilon_start=0.4,
         epsilon_end=0.001,
         epsilon_decay=300,
-        target_update_freq=10,
-        memory_size=10000,
+        target_update_freq=50,
+        memory_size=1000,
         gamma=0.99,
         seed=42
-)
+    )

@@ -5,20 +5,12 @@ import sys
 
 def plot_results(
     results_dir,
-    success_rate_interval=10,
-    moving_average_interval=20,
 ):
     """
     Plot and save training metrics from the results directory.
     
     Parameters:
         results_dir (str): Path to the directory containing the result `.npy` files.
-        success_rate_interval (int, optional): 
-            Number of episodes over which to calculate the success rate.
-            Defaults to 10.
-        moving_average_interval (int, optional): 
-            Window size for calculating the moving average of rewards.
-            Defaults to 20.
     Returns:
         None
     """
@@ -90,38 +82,103 @@ def plot_results(
     )
     
     # Plot success rates
-    success_rate_episodes = np.arange(
-        success_rate_interval, 
-        len(success_rates)*success_rate_interval + 1, 
-        success_rate_interval
-    )
     plot_and_save(
         data=success_rates,
         ylabel='Success Rate',
         filename='success_rates',
-        x=success_rate_episodes,
         title='Success Rate over Episodes'
     )
     
     # Plot moving average rewards
-    moving_avg_reward_episodes = np.arange(
-        moving_average_interval - 1, 
-        len(moving_average_rewards) + moving_average_interval - 1
-    )
     plot_and_save(
         data=moving_average_rewards,
         ylabel='Moving Average Reward',
         filename='moving_average_rewards',
-        x=moving_avg_reward_episodes,
         title='Moving Average Reward over Episodes'
     )
     
     print("All charts have been saved in the directory:", results_dir)
 
+def plot_multiple_datasets_extended(
+    data_paths: list,
+    labels: list,
+    title: str = 'Comparison of Moving Average Rewards',
+    xlabel: str = 'Episode',
+    ylabel: str = 'Moving Average Reward',
+    save_path: str = None,
+    show_plot: bool = True
+) -> None:
+    """
+    Plot multiple datasets on a single graph for comparison.
+    
+    Parameters:
+        data_paths (list of str): List of paths to `.npy` data files.
+        labels (list of str): List of labels for each dataset.
+        title (str, optional): Title of the plot. Defaults to 'Comparison of Moving Average Rewards'.
+        xlabel (str, optional): Label for the x-axis. Defaults to 'Episode'.
+        ylabel (str, optional): Label for the y-axis. Defaults to 'Moving Average Reward'.
+        save_path (str, optional): Path to save the plot image. If None, the plot is not saved. Defaults to None.
+        show_plot (bool, optional): If True, displays the plot. Defaults to True.
+    
+    Returns:
+        None
+    """
+    if len(data_paths) != len(labels):
+        raise ValueError("The number of data paths must match the number of labels.")
+    
+    plt.figure(figsize=(10, 6))
+    
+    for data_path, label in zip(data_paths, labels):
+        if not os.path.isfile(data_path):
+            raise FileNotFoundError(f"The data file was not found: {data_path}")
+        try:
+            data = np.load(data_path)
+        except Exception as e:
+            raise ValueError(f"Error loading data from {data_path}: {e}")
+        
+        episodes = np.arange(1, len(data) + 1)
+        plt.plot(episodes, data, label=label, linewidth=2)
+    
+    plt.title(title, fontsize=16)
+    plt.xlabel(xlabel, fontsize=14)
+    plt.ylabel(ylabel, fontsize=14)
+    plt.legend(fontsize=12)
+    plt.grid(True)
+    plt.tight_layout()
+    
+    if save_path:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        plt.savefig(save_path, dpi=300)
+        print(f"Plot saved to {save_path}")
+    
+    if show_plot:
+        plt.show()
+    
+    plt.close()
 
-if __name__ == "__main__":   
-    # Call the plot_results function with default intervals
-    plot_results(results_dir="runs/5_5000_2024-10-25_19:12:52",
-                 success_rate_interval=20,
-                 moving_average_interval=20
-                 )
+
+
+# one plot
+plot_results(results_dir="runs/2024-10-26_02:31:36_5_2000")
+
+# # extended plot
+# if __name__ == "__main__":
+#     data_files = [
+#         'runs/2024-10-25_19:36:47_5_5000/moving_average_rewards.npy',
+#         'runs/q_learning_rewards_smooth.npy',
+#     ]
+#     labels = [
+#         'Run 1: Our method',
+#         'Run 2: Q-learning',
+#     ]
+#     plot_save_path = 'runs/comparison_moving_average_rewards.png'
+    
+#     plot_multiple_datasets_extended(
+#         data_paths=data_files,
+#         labels=labels,
+#         title='Comparison of Moving Average Rewards',
+#         xlabel='Episode',
+#         ylabel='Moving Average Reward',
+#         save_path=plot_save_path,
+#         show_plot=True
+#     )

@@ -124,14 +124,14 @@ def evaluate_dqn(
 if __name__ == "__main__":
 
     evaluation_results = evaluate_dqn(
-        config_file="config/config_5_real.json",
-        model_path="runs/5_5000_2024-10-25_18:57:23/policy_net.pth",
-        num_episodes=50,
+        config_file="config/config_5_0.4.json",
+        model_path="runs/2024-10-26_02:38:37_5_5000/policy_net.pth",
+        num_episodes=100,
         seed=42,
         verbose=True
     )
 
-    num_eval_episodes = 10
+    num_eval_episodes = 100
     if evaluation_results:
         avg_reward = np.mean([res['total_reward'] for res in evaluation_results])
         avg_steps = np.mean([res['steps'] for res in evaluation_results])

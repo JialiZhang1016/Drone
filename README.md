@@ -49,6 +49,7 @@ To train the DQN agent:
 ```bash
 python train.py
 ```
+
 The results will be saved in the `runs` directory, named with the format `num_locations_num_episodes_timestamp`.
 
 ### Plotting Results
@@ -56,7 +57,7 @@ The results will be saved in the `runs` directory, named with the format `num_lo
 To visualize training results:
 
 ```bash
-python plot_results.py runs/5_500_YYYYMMDD-HHMMSS
+python plot_results.py
 ```
 
 This will generate plots for:
@@ -109,4 +110,3 @@ Training results and model checkpoints are stored in the `runs` directory. Each 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
