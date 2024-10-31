@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 
 def linear_epsilon_decay(episode, max_episodes, min_epsilon=0.01):
     """
@@ -14,7 +13,8 @@ def linear_epsilon_decay(episode, max_episodes, min_epsilon=0.01):
     Returns:
         float: Current ε value.
     """
-    return max(min_epsilon, 1 - episode / (0.8 * max_episodes))
+    #return max(min_epsilon, 1 - episode / (0.8 * max_episodes))
+    return max(min_epsilon, np.exp(-0.00005*episode))
 
 def exponential_epsilon_decay(episode, epsilon_start, epsilon_end, decay_rate):
     """
@@ -33,7 +33,7 @@ def exponential_epsilon_decay(episode, epsilon_start, epsilon_end, decay_rate):
 
 def plot_epsilon_decay(total_episodes, linear_params_list, exponential_params_list):
     """
-    Plot curves for linear decay and exponential decay ε strategies and save the graph.
+    Plot curves for linear decay and exponential decay ε strategies.
     
     Parameters:
         total_episodes (int): Total number of episodes to consider for plotting.
@@ -66,24 +66,17 @@ def plot_epsilon_decay(total_episodes, linear_params_list, exponential_params_li
     plt.legend(fontsize=12)
     plt.grid(True)
     plt.tight_layout()
-    
-    # Create the directory if it doesn't exist
-    save_dir = "runs/compare_q_DQN_random"
-    os.makedirs(save_dir, exist_ok=True)
-    
-    # Save the figure
-    plt.savefig(os.path.join(save_dir, "epsilon_decay_comparison.png"))
-    plt.close()  # Close the figure to free up memory
+    plt.show()
 
 if __name__ == "__main__":
     # Define total number of training episodes
-    total_episodes = 6000
+    total_episodes = 300000
     
     # Define different parameter settings for linear decay strategy
     linear_params_list = [
-        # {'max_episodes': 10000, 'min_epsilon': 0.01},
-        # {'max_episodes': 8000, 'min_epsilon': 0.05},
-        # {'max_episodes': 6000, 'min_epsilon': 0.1}
+        {'max_episodes': 300000, 'min_epsilon': 0.01},
+        # {'max_episodes': 8000, 'min_epsilon': 0.01},
+        # {'max_episodes': 6000, 'min_epsilon': 0.01}
     ]
     
     # Define different parameter settings for exponential decay strategy
@@ -94,4 +87,4 @@ if __name__ == "__main__":
     ]
     
     # Plot ε decay curves
-    plot_epsilon_decay(total_episodes, linear_params_list, exponential_params_list)
+    plot_epsilon_decay(total_episodes, linear_params_list, exponential_params_list=exponential_params_list)

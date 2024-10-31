@@ -1,80 +1,87 @@
+import json
 import pulp
 import numpy as np
 
-# 配置参数
-num_locations = 5
-T_max = 320
-weather_prob = 0.4
-T_flight_expected = [
-    [0, 32.4, 15.2, 16.6, 22.2, 20.6],
-    [32.4, 0, 21.8, 17.6, 19.4, 31.8],
-    [15.2, 21.8, 0, 16.0, 28.4, 24.2],
-    [16.6, 17.6, 16.0, 0, 13.0, 16.8],
-    [22.2, 19.4, 28.4, 13.0, 0, 19.2],
-    [20.6, 31.8, 24.2, 16.8, 19.2, 0]
-]
-T_data_lower = [0, 18, 10, 15, 23, 20]
-T_data_upper = [0, 25, 16, 21, 30, 25]
-criticality = ["HC", "HC", "LC", "HC", "LC", "LC"]
-R_data = [0, 10, 2, 10, 2, 2] 
+# read config
+config_path = 'config/config_20.json'
+with open(config_path, 'r', encoding='utf-8') as f:
+    config = json.load(f)
 
-# 创建模型
-model = pulp.LpProblem("DroneRoutePlanning", pulp.LpMaximize)
+# extract config parameters
+num_locations = config["num_locations"]
+T_max = config["T_max"] * 0.8
+weather_prob = config["weather_prob"]
+P_penalty = config["P_penalty"]
+T_flight_good = np.array(config["T_flight_good"])
+T_flight_bad = np.array(config["T_flight_bad"])
+T_data_lower = config["T_data_lower"]
+T_data_upper = config["T_data_upper"]
+criticality = config["criticality"]
 
-# 决策变量
-x = pulp.LpVariable.dicts("x", [(i, j) for i in range(6) for j in range(6) if i != j], cat='Binary')
-t = pulp.LpVariable.dicts("t", [j for j in range(1, 6)], lowBound=0, cat='Continuous')
-u = pulp.LpVariable.dicts("u", [j for j in range(1, 6)], lowBound=1, upBound=5, cat='Integer')
+# calculate expected flight time
+T_flight_expected = (weather_prob) * T_flight_good + (1 - weather_prob) * T_flight_bad
+T_flight_expected = T_flight_expected.tolist()
 
-# 目标函数
+# generate R_data, set reward according to criticality
+# assume "HC" corresponds to 10, "LC" corresponds to 2, and the reward for location 0 is 0
+R_data = [0] + [10 if c == "HC" else 2 for c in criticality[1:]]
+
+# create model
+model = pulp.LpProblem("DroneRoutePlanning", pulp.LpMaximize)   
+
+# decision variables
+locations = list(range(num_locations + 1))  # 包括位置0
+x = pulp.LpVariable.dicts("x", [(i, j) for i in locations for j in locations if i != j], cat='Binary')
+t = pulp.LpVariable.dicts("t", [j for j in locations if j != 0], lowBound=0, cat='Continuous')
+u = pulp.LpVariable.dicts("u", [j for j in locations if j != 0], lowBound=1, upBound=num_locations, cat='Integer')
+
+# objective function
 model += (
-    pulp.lpSum([R_data[j] * t[j] for j in range(1, 6)]) -
-    pulp.lpSum([T_flight_expected[i][j] * x[(i,j)] for i in range(6) for j in range(6) if i != j]) -
-    pulp.lpSum([t[j] for j in range(1, 6)])
+    pulp.lpSum([R_data[j] * t[j] for j in locations if j != 0]) -
+    pulp.lpSum([T_flight_expected[i][j] * x[(i,j)] for i in locations for j in locations if i != j]) -
+    pulp.lpSum([t[j] for j in locations if j != 0])
 ), "TotalRewardMinusCost"
 
-# 约束条件
+# constraints
 
-# 访问约束：每个位置被访问一次
-for j in range(1, 6):
-    model += pulp.lpSum([x[(i,j)] for i in range(6) if i != j]) == 1, f"VisitOnce_{j}"
+# visit constraint: each location is visited once
+for j in locations:
+    if j != 0:
+        model += pulp.lpSum([x[(i, j)] for i in locations if i != j]) == 1, f"VisitOnce_{j}"
 
-# 每个位置出发一次
-for i in range(6):
-    model += pulp.lpSum([x[(i,j)] for j in range(6) if j != i]) == 1, f"DepartOnce_{i}"
+# each location is visited once
+for i in locations:
+    model += pulp.lpSum([x[(i, j)] for j in locations if j != i]) == 1, f"DepartOnce_{i}"
 
-# MTZ约束（消除子环路）
-for i in range(1, 6):
-    for j in range(1, 6):
-        if i != j:
-            model += u[i] - u[j] + 1 <= 5 * (1 - x[(i,j)]), f"MTZ_{i}_{j}"
+# MTZ constraint (eliminate subcycles)
+for i in locations:
+    if i == 0:
+        continue
+    for j in locations:
+        if j == 0 or j == i:
+            continue
+        model += u[i] - u[j] + 1 <= num_locations * (1 - x[(i,j)]), f"MTZ_{i}_{j}"
 
-# 时间约束：总飞行时间 + 数据收集时间 <= T_max
+# time constraint: total flight time + data collection time <= T_max
 model += (
-    pulp.lpSum([T_flight_expected[i][j] * x[(i,j)] for i in range(6) for j in range(6) if i != j]) +
-    pulp.lpSum([t[j] for j in range(1, 6)]) <= T_max
+    pulp.lpSum([T_flight_expected[i][j] * x[(i,j)] for i in locations for j in locations if i != j]) +
+    pulp.lpSum([t[j] for j in locations if j != 0]) <= T_max
 ), "TotalTime"
 
 # 返回Home的约束
-model += pulp.lpSum([x[(i,0)] for i in range(1, 6)]) == 1, "ReturnHome"
-
+model += pulp.lpSum([x[(i,0)] for i in locations if i != 0]) == 1, "ReturnHome"
+    
 # 数据收集时间上下界
-model += t[1] >= 18, "T1_Lower"
-model += t[1] <= 25, "T1_Upper"
-model += t[2] >= 10, "T2_Lower"
-model += t[2] <= 16, "T2_Upper"
-model += t[3] >= 15, "T3_Lower"
-model += t[3] <= 21, "T3_Upper"
-model += t[4] >= 23, "T4_Lower"
-model += t[4] <= 30, "T4_Upper"
-model += t[5] >= 20, "T5_Lower"
-model += t[5] <= 25, "T5_Upper"
+for j in locations:
+    if j == 0:
+        continue
+    model += t[j] >= T_data_lower[j], f"T{j}_Lower"
+    model += t[j] <= T_data_upper[j], f"T{j}_Upper"
 
 # 自环约束（确保 x[i,i] = 0）
-for i in range(6):
-    for j in range(6):
+for i in locations:
+    for j in locations:
         if i == j:
-            var_name = f"x_({i},{j})"
             if (i, j) in x:
                 model += x[(i,j)] == 0, f"NoSelfLoop_{i}_{j}"
 
@@ -84,7 +91,21 @@ model.solve(solver)
 
 # 输出结果
 print("Status:", pulp.LpStatus[model.status])
+
+print("\n决策变量 x 的值 (路径):")
+for i in locations:
+    for j in locations:
+        if i != j and pulp.value(x[(i,j)]) > 0:
+            print(f"x_{i}_{j} = {pulp.value(x[(i,j)])}")
+
+print("\n数据收集时间 t 的值:")
+for j in locations:
+    if j != 0:
+        print(f"t_{j} = {pulp.value(t[j])}")
+
+print("\n顺序变量 u 的值:")
+for j in locations:
+    if j != 0:
+        print(f"u_{j} = {pulp.value(u[j])}")
+
 print("Objective:", pulp.value(model.objective))
-# for var in model.variables():
-#     if var.varValue > 0:
-#         print(var.name, "=", var.varValue)

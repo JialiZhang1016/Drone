@@ -124,11 +124,18 @@ def evaluate_dqn(
 if __name__ == "__main__":
 
     evaluation_results = evaluate_dqn(
-        config_file="config/config_5_0.4.json",
-        model_path="runs/2024-10-26_20:24:55_5_10000/policy_net.pth",
+        # config_file="config/config_5_0.4.json",
+        # model_path="runs/2024-10-26_19:09:20_5_6000/policy_net.pth",
+
+        # config_file="config/config_10.json",
+        # model_path="runs/2024-10-26_19:29:04_10_6000/policy_net.pth",
+
+        config_file="config/config_20.json",
+        model_path="runs/2024-10-26_19:37:50_20_6000/policy_net.pth",
+
         num_episodes=1000,
         seed=42,
-        verbose=True
+        verbose=False
     )
 
     num_eval_episodes = 1000

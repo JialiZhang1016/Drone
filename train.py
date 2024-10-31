@@ -181,14 +181,14 @@ if __name__ == "__main__":
     num_episodes = 2000
     batch_size = 64
     epsilon_start = 1.0
-    epsilon_end = 0.1
+    epsilon_end = 0.01
     epsilon_decay = 300
     target_update_freq = 50
     memory_size = 1000
     gamma = 0.99
     seed = 42
     success_rate_interval = 50
-    moving_average_interval = 20
+    moving_average_interval = 50
     save_interval = 1000
     results_base_dir = 'runs'
 
