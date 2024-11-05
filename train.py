@@ -175,6 +175,84 @@ def train_dqn(
     
     return results_dir  # Return the results directory path
 
+def update_config(original_config_path, new_weather_prob, output_config_path):
+    """
+    Reads the original config file, updates the weather_prob, and writes to a new config file.
+
+    Parameters:
+        original_config_path (str): Path to the original config file.
+        new_weather_prob (float): New weather probability to set.
+        output_config_path (str): Path to save the updated config file.
+    """
+    with open(original_config_path, 'r') as f:
+        config = json.load(f)
+    
+    config['weather_prob'] = new_weather_prob
+    
+    with open(output_config_path, 'w') as f:
+        json.dump(config, f, indent=4)
+    
+    print(f"Updated config saved to {output_config_path} with weather_prob={new_weather_prob}")
+
+
+if __name__ == "__main__":
+    # Original configuration file
+    original_config_file = 'config/config_5.json'
+    
+    # Weather probabilities to iterate over
+    weather_probs = [0.2, 0.5, 0.8, 1.0]
+    
+    # Training parameters
+    num_episodes = 1000
+    batch_size = 64
+    epsilon_start = 1.0
+    epsilon_end = 0.01
+    epsilon_decay = 300
+    target_update_freq = 50
+    memory_size = 1000
+    gamma = 0.99
+    seed = 42
+    success_rate_interval = 50
+    moving_average_interval = 50
+    save_interval = 1000
+    results_base_dir = 'runs'
+    updated_config_dir = 'config/updated_configs'  # Directory to save updated config files
+
+    # Ensure the results directory exists
+    os.makedirs(results_base_dir, exist_ok=True)
+    os.makedirs(updated_config_dir, exist_ok=True)
+    
+    for wp in weather_probs:
+        # Define a unique config filename for each weather_prob
+        config_filename = f"config_5_wp_{wp}.json"
+        config_path = os.path.join(updated_config_dir, config_filename)
+        
+        # Update the config with the new weather_prob
+        update_config(original_config_file, wp, config_path)
+        
+        # Train the DQN agent with the updated config
+        results_dir = train_dqn(
+            config_file=config_path,
+            num_episodes=num_episodes,
+            batch_size=batch_size,
+            epsilon_start=epsilon_start,
+            epsilon_end=epsilon_end,
+            epsilon_decay=epsilon_decay,
+            target_update_freq=target_update_freq,
+            memory_size=memory_size,
+            gamma=gamma,
+            seed=seed,
+            success_rate_interval=success_rate_interval,
+            moving_average_interval=moving_average_interval,
+            save_interval=save_interval,
+            results_base_dir=results_base_dir
+        )
+        
+        # Plot the results after training
+        plot_results(results_dir=results_dir)
+        
+        print(f"Completed training for weather_prob={wp}\n")
+"""
 if __name__ == "__main__":
     # Training parameters
     config_file = 'config/config_5_0.4.json'
@@ -212,3 +290,5 @@ if __name__ == "__main__":
     
     # Plot the results after training
     plot_results(results_dir=results_dir)
+
+"""
