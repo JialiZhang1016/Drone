@@ -9,7 +9,9 @@ from collections import deque
 import os
 from datetime import datetime
 import time
+import csv  # Import csv module for writing CSV files
 from plot_results import plot_results  # Ensure this function is correctly implemented
+from evaluate import evaluate_dqn  # Import the evaluation function
 
 def train_dqn(
     config_file='config/config_5.json',
@@ -65,7 +67,7 @@ def train_dqn(
     # Create directory for saving results
     results_dir = os.path.join(
         results_base_dir,
-        f"{current_time}_{num_locations}_{num_episodes}"
+        f"{current_time}_wp_{config['weather_prob']}_{num_locations}_{num_episodes}"
     )
     os.makedirs(results_dir, exist_ok=True)
     
@@ -194,6 +196,7 @@ def update_config(original_config_path, new_weather_prob, output_config_path):
     
     print(f"Updated config saved to {output_config_path} with weather_prob={new_weather_prob}")
 
+# Removed the save_evaluation_results function as it's no longer needed
 
 if __name__ == "__main__":
     # Original configuration file
@@ -217,78 +220,78 @@ if __name__ == "__main__":
     save_interval = 1000
     results_base_dir = 'runs'
     updated_config_dir = 'config/updated_configs'  # Directory to save updated config files
-
-    # Ensure the results directory exists
+    
+    # Ensure the results and updated config directories exist
     os.makedirs(results_base_dir, exist_ok=True)
     os.makedirs(updated_config_dir, exist_ok=True)
     
-    for wp in weather_probs:
-        # Define a unique config filename for each weather_prob
-        config_filename = f"config_5_wp_{wp}.json"
-        config_path = os.path.join(updated_config_dir, config_filename)
-        
-        # Update the config with the new weather_prob
-        update_config(original_config_file, wp, config_path)
-        
-        # Train the DQN agent with the updated config
-        results_dir = train_dqn(
-            config_file=config_path,
-            num_episodes=num_episodes,
-            batch_size=batch_size,
-            epsilon_start=epsilon_start,
-            epsilon_end=epsilon_end,
-            epsilon_decay=epsilon_decay,
-            target_update_freq=target_update_freq,
-            memory_size=memory_size,
-            gamma=gamma,
-            seed=seed,
-            success_rate_interval=success_rate_interval,
-            moving_average_interval=moving_average_interval,
-            save_interval=save_interval,
-            results_base_dir=results_base_dir
-        )
-        
-        # Plot the results after training
-        plot_results(results_dir=results_dir)
-        
-        print(f"Completed training for weather_prob={wp}\n")
-"""
-if __name__ == "__main__":
-    # Training parameters
-    config_file = 'config/config_5_0.4.json'
-    num_episodes = 2000
-    batch_size = 64
-    epsilon_start = 1.0
-    epsilon_end = 0.01
-    epsilon_decay = 300
-    target_update_freq = 50
-    memory_size = 1000
-    gamma = 0.99
-    seed = 42
-    success_rate_interval = 50
-    moving_average_interval = 50
-    save_interval = 1000
-    results_base_dir = 'runs'
-
-    # Train the DQN agent and capture the results directory
-    results_dir = train_dqn(
-        config_file=config_file,
-        num_episodes=num_episodes,
-        batch_size=batch_size,
-        epsilon_start=epsilon_start,
-        epsilon_end=epsilon_end,
-        epsilon_decay=epsilon_decay,
-        target_update_freq=target_update_freq,
-        memory_size=memory_size,
-        gamma=gamma,
-        seed=seed,
-        success_rate_interval=success_rate_interval,
-        moving_average_interval=moving_average_interval,
-        save_interval=save_interval,
-        results_base_dir=results_base_dir
-    )
+    # Initialize a list to store summary data
+    summary_data = []
     
-    # Plot the results after training
-    plot_results(results_dir=results_dir)
+    for wp in weather_probs:
+        try:
+            # Define a unique config filename for each weather_prob
+            config_filename = f"config_5_wp_{wp}.json"
+            config_path = os.path.join(updated_config_dir, config_filename)
+            
+            # Update the config with the new weather_prob
+            update_config(original_config_file, wp, config_path)
+            
+            # Train the DQN agent with the updated config
+            results_dir = train_dqn(
+                config_file=config_path,
+                num_episodes=num_episodes,
+                batch_size=batch_size,
+                epsilon_start=epsilon_start,
+                epsilon_end=epsilon_end,
+                epsilon_decay=epsilon_decay,
+                target_update_freq=target_update_freq,
+                memory_size=memory_size,
+                gamma=gamma,
+                seed=seed,
+                success_rate_interval=success_rate_interval,
+                moving_average_interval=moving_average_interval,
+                save_interval=save_interval,
+                results_base_dir=results_base_dir
+            )
+            
+            # Plot the results after training
+            plot_results(results_dir=results_dir)
+            
+            # Evaluate the trained model
+            evaluation_results = evaluate_dqn(
+                config_file=config_path,
+                model_path=os.path.join(results_dir, 'policy_net.pth'),
+                num_episodes=1000,  # Adjust as needed
+                seed=seed,
+                verbose=False  # Set to True if you want detailed logs
+            )
+            
+            # Calculate average reward and average steps
+            avg_reward = np.mean([res['total_reward'] for res in evaluation_results])
+            avg_steps = np.mean([res['steps'] for res in evaluation_results])
+            
+            # Append the results to summary_data
+            summary_data.append({
+                'weather_prob': wp,
+                'avg_reward': avg_reward,
+                'avg_steps': avg_steps
+            })
+            
+            # Optionally, print the summary for each weather_prob
+            print(f"Weather Prob: {wp}, Avg Reward: {avg_reward:.2f}, Avg Steps: {avg_steps:.2f}\n")
+        
+        except Exception as e:
+            print(f"An error occurred for weather_prob={wp}: {e}\n")
+    
+    # After all trainings, save the summary_data to a CSV file
+    summary_csv_path = os.path.join(results_base_dir, 'summary_results.csv')
+    with open(summary_csv_path, mode='w', newline='') as csv_file:
+        fieldnames = ['weather_prob', 'avg_reward', 'avg_steps']
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
 
-"""
+        writer.writeheader()
+        for data in summary_data:
+            writer.writerow(data)
+    
+    print(f"Summary of results saved to {summary_csv_path}")
