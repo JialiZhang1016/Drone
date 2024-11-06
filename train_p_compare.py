@@ -10,9 +10,9 @@ from collections import deque
 import os
 from datetime import datetime
 import time
-import csv  # Import csv module for writing CSV files
-from plot_results import plot_results  # Ensure this function is correctly implemented
-from evaluate import evaluate_dqn  # Import the evaluation function
+import csv
+from plot_results import plot_results
+from evaluate import evaluate_dqn
 
 def train_dqn(
     config_file='config/config_5.json',
@@ -32,7 +32,7 @@ def train_dqn(
     moving_average_interval=100,
     save_interval=100,
     results_base_dir='runs',
-    use_action_mask=True  # Added parameter to control action mask usage
+    use_action_mask=True
 ) -> str:
     """
     Train a DQN agent for drone route planning.
@@ -214,13 +214,13 @@ def update_config(original_config_path, new_weather_prob, output_config_path):
 if __name__ == "__main__":
     # Locations and weather probabilities to iterate over
     locations = ["config/config_5.json", "config/config_10.json", "config/config_20.json"]
-    weather_probs = [0.2, 0.5]
+    weather_probs = [0.2, 0.5, 0.8, 1]
     # Training parameters
     num_episodes = 10
     use_action_mask = True
     batch_size = 64
     epsilon_start = 1.0
-    epsilon_end = 0.01
+    epsilon_end = 0.001
     epsilon_decay = 700
     target_update_freq = 50
     memory_size = 1000
@@ -241,18 +241,18 @@ if __name__ == "__main__":
     # Initialize a list to store summary data
     summary_data = []
 
-    for location_file in locations:
-        # Extract location number from config file name
-        location_num = int(location_file.split('_')[-1].split('.')[0])
+    for location in locations:
+        # Extract location number from the config filename
+        location_num = int(location.split('_')[-1].split('.')[0])
         for wp in weather_probs:
-            # Define a unique config filename for each location and weather_prob
+            # Define a unique config filename for each weather_prob and location
             config_filename = f"config_{location_num}_wp_{wp}.json"
             config_path = os.path.join(updated_config_dir, config_filename)
-            
+                
             # Update the config with the new weather_prob
-            update_config(location_file, wp, config_path)
+            update_config(location, wp, config_path)
                     
-            # Train the DQN agent with the updated config and use_action_mask setting
+            # Train the DQN agent with the updated config
             results_dir = train_dqn(
                 config_file=config_path,
                 num_episodes=num_episodes,
@@ -268,10 +268,10 @@ if __name__ == "__main__":
                 moving_average_interval=moving_average_interval,
                 save_interval=save_interval,
                 results_base_dir=results_base_dir,
-                use_action_mask=use_action_mask  # Pass the use_action_mask parameter
+                use_action_mask=use_action_mask
             )
                     
-            # Plot the results after training
+            # Plot the results after training (optional)
             plot_results(results_dir=results_dir)
                     
             # Evaluate the trained model
@@ -281,7 +281,7 @@ if __name__ == "__main__":
                 num_episodes=1000,  # Adjust as needed
                 seed=seed,
                 verbose=False,  # Set to True if you want detailed logs
-                use_action_mask=use_action_mask  # Pass the use_action_mask parameter if needed
+                use_action_mask=use_action_mask
             )
                     
             # Calculate average reward and average steps
@@ -296,13 +296,11 @@ if __name__ == "__main__":
                 'avg_steps': avg_steps
             })
                     
-            # Optionally, print the summary
-            print(f"Location: {location_num}, p: {wp}, "
-                  f"Avg Reward: {avg_reward:.2f}, Avg Steps: {avg_steps:.2f}")
-    
+            # Optionally, print the summary for each setting
+            print(f"Location: {location_num}, Weather Prob: {wp}, Avg Reward: {avg_reward:.2f}, Avg Steps: {avg_steps:.2f}\n")
+
     # After all trainings, save the summary_data to a CSV file
-    os.makedirs(os.path.join('runs', 'summary_results'), exist_ok=True)
-    summary_csv_path = os.path.join('runs/summary_results', 'summary_p_compare_epsilon.csv')
+    summary_csv_path = os.path.join(results_base_dir, 'summary_results.csv')
     with open(summary_csv_path, mode='w', newline='') as csv_file:
         fieldnames = ['locations', 'p', 'avg_reward', 'avg_steps']
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
@@ -310,5 +308,5 @@ if __name__ == "__main__":
         writer.writeheader()
         for data in summary_data:
             writer.writerow(data)
-
+    
     print(f"Summary of results saved to {summary_csv_path}")
