@@ -211,21 +211,17 @@ def update_config(original_config_path, new_weather_prob, output_config_path):
     
     print(f"Updated config saved to {output_config_path} with weather_prob={new_weather_prob}")
 
-# weather_probs = [0.2, 0.5, 0.8, 1.0]
-
 if __name__ == "__main__":
-    # Original configuration file
-    original_config_file = 'config/config_10.json'
-    
-    # Weather probabilities to iterate over
-    weather_probs = [0.2, 0.5, 0.8, 1.0]
+    # Locations and weather probabilities to iterate over
+    locations = ["config/config_5.json", "config/config_10.json", "config/config_20.json"]
+    weather_probs = [0.2, 0.5]
     # Training parameters
-    num_episodes = 10000
+    num_episodes = 10
     use_action_mask = True
     batch_size = 64
     epsilon_start = 1.0
     epsilon_end = 0.01
-    epsilon_decay = 1000
+    epsilon_decay = 700
     target_update_freq = 50
     memory_size = 1000
     gamma = 0.99
@@ -237,79 +233,82 @@ if __name__ == "__main__":
     save_interval = 1000
     results_base_dir = 'runs'
     updated_config_dir = 'config/updated_configs'  # Directory to save updated config files
-    
+
     # Ensure the results and updated config directories exist
     os.makedirs(results_base_dir, exist_ok=True)
     os.makedirs(updated_config_dir, exist_ok=True)
-    
+
     # Initialize a list to store summary data
     summary_data = []
-    
-    for wp in weather_probs:
-        # Define a unique config filename for each weather_prob
-        config_filename = f"config_5_wp_{wp}.json"
-        config_path = os.path.join(updated_config_dir, config_filename)
-            
-        # Update the config with the new weather_prob
-        update_config(original_config_file, wp, config_path)
-                
-        # Train the DQN agent with the updated config and use_action_mask setting
-        results_dir = train_dqn(
-            config_file=config_path,
-            num_episodes=num_episodes,
-            batch_size=batch_size,
-            epsilon_start=epsilon_start,
-            epsilon_end=epsilon_end,
-            epsilon_decay=epsilon_decay,
-            target_update_freq=target_update_freq,
-            memory_size=memory_size,
-            gamma=gamma,
-            seed=seed,
-            success_rate_interval=success_rate_interval,
-            moving_average_interval=moving_average_interval,
-            save_interval=save_interval,
-            results_base_dir=results_base_dir,
-            use_action_mask=use_action_mask  # Pass the use_action_mask parameter
-        )
-                
-        # Plot the results after training
-        plot_results(results_dir=results_dir)
-                
-        # Evaluate the trained model
-        evaluation_results = evaluate_dqn(
-            config_file=config_path,
-            model_path=os.path.join(results_dir, 'policy_net.pth'),
-            num_episodes=1000,  # Adjust as needed
-            seed=seed,
-            verbose=False,  # Set to True if you want detailed logs
-            use_action_mask=use_action_mask  # Pass the use_action_mask parameter if needed
-        )
-                
-        # Calculate average reward and average steps
-        avg_reward = np.mean([res['total_reward'] for res in evaluation_results])
-        avg_steps = np.mean([res['steps'] for res in evaluation_results])
-                
-        # Append the results to summary_data
-        summary_data.append({
-            'weather_prob': wp,
-            'use_action_mask': use_action_mask,
-            'avg_reward': avg_reward,
-            'avg_steps': avg_steps
-        })
-                
-        # Optionally, print the summary for each weather_prob and use_action_mask setting
-        mask_status = "With Mask" if use_action_mask else "Without Mask"
-        print(f"Weather Prob: {wp}, {mask_status}, Avg Reward: {avg_reward:.2f}, Avg Steps: {avg_steps:.2f}\n")
 
+    for location_file in locations:
+        # Extract location number from config file name
+        location_num = int(location_file.split('_')[-1].split('.')[0])
+        for wp in weather_probs:
+            # Define a unique config filename for each location and weather_prob
+            config_filename = f"config_{location_num}_wp_{wp}.json"
+            config_path = os.path.join(updated_config_dir, config_filename)
+            
+            # Update the config with the new weather_prob
+            update_config(location_file, wp, config_path)
+                    
+            # Train the DQN agent with the updated config and use_action_mask setting
+            results_dir = train_dqn(
+                config_file=config_path,
+                num_episodes=num_episodes,
+                batch_size=batch_size,
+                epsilon_start=epsilon_start,
+                epsilon_end=epsilon_end,
+                epsilon_decay=epsilon_decay,
+                target_update_freq=target_update_freq,
+                memory_size=memory_size,
+                gamma=gamma,
+                seed=seed,
+                success_rate_interval=success_rate_interval,
+                moving_average_interval=moving_average_interval,
+                save_interval=save_interval,
+                results_base_dir=results_base_dir,
+                use_action_mask=use_action_mask  # Pass the use_action_mask parameter
+            )
+                    
+            # Plot the results after training
+            plot_results(results_dir=results_dir)
+                    
+            # Evaluate the trained model
+            evaluation_results = evaluate_dqn(
+                config_file=config_path,
+                model_path=os.path.join(results_dir, 'policy_net.pth'),
+                num_episodes=1000,  # Adjust as needed
+                seed=seed,
+                verbose=False,  # Set to True if you want detailed logs
+                use_action_mask=use_action_mask  # Pass the use_action_mask parameter if needed
+            )
+                    
+            # Calculate average reward and average steps
+            avg_reward = np.mean([res['total_reward'] for res in evaluation_results])
+            avg_steps = np.mean([res['steps'] for res in evaluation_results])
+                    
+            # Append the results to summary_data
+            summary_data.append({
+                'locations': location_num,
+                'p': wp,
+                'avg_reward': avg_reward,
+                'avg_steps': avg_steps
+            })
+                    
+            # Optionally, print the summary
+            print(f"Location: {location_num}, p: {wp}, "
+                  f"Avg Reward: {avg_reward:.2f}, Avg Steps: {avg_steps:.2f}")
     
     # After all trainings, save the summary_data to a CSV file
-    summary_csv_path = os.path.join(results_base_dir, 'summary_results.csv')
+    os.makedirs(os.path.join('runs', 'summary_results'), exist_ok=True)
+    summary_csv_path = os.path.join('runs/summary_results', 'summary_p_compare_epsilon.csv')
     with open(summary_csv_path, mode='w', newline='') as csv_file:
-        fieldnames = ['weather_prob', 'use_action_mask', 'avg_reward', 'avg_steps']
+        fieldnames = ['locations', 'p', 'avg_reward', 'avg_steps']
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
 
         writer.writeheader()
         for data in summary_data:
             writer.writerow(data)
-    
+
     print(f"Summary of results saved to {summary_csv_path}")
