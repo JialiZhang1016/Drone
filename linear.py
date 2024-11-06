@@ -3,7 +3,7 @@ import pulp
 import numpy as np
 
 # read config
-config_path = 'config/config_20.json'
+config_path = 'config/config_5.json'
 with open(config_path, 'r', encoding='utf-8') as f:
     config = json.load(f)
 
@@ -89,23 +89,23 @@ for i in locations:
 solver = pulp.PULP_CBC_CMD(msg=True)
 model.solve(solver)
 
-# 输出结果
-print("Status:", pulp.LpStatus[model.status])
+# # 输出结果
+# print("Status:", pulp.LpStatus[model.status])
 
-print("\n决策变量 x 的值 (路径):")
-for i in locations:
-    for j in locations:
-        if i != j and pulp.value(x[(i,j)]) > 0:
-            print(f"x_{i}_{j} = {pulp.value(x[(i,j)])}")
+# print("\n决策变量 x 的值 (路径):")
+# for i in locations:
+#     for j in locations:
+#         if i != j and pulp.value(x[(i,j)]) > 0:
+#             print(f"x_{i}_{j} = {pulp.value(x[(i,j)])}")
 
-print("\n数据收集时间 t 的值:")
-for j in locations:
-    if j != 0:
-        print(f"t_{j} = {pulp.value(t[j])}")
+# print("\n数据收集时间 t 的值:")
+# for j in locations:
+#     if j != 0:
+#         print(f"t_{j} = {pulp.value(t[j])}")
 
-print("\n顺序变量 u 的值:")
-for j in locations:
-    if j != 0:
-        print(f"u_{j} = {pulp.value(u[j])}")
+# print("\n顺序变量 u 的值:")
+# for j in locations:
+#     if j != 0:
+#         print(f"u_{j} = {pulp.value(u[j])}")
 
 print("Objective:", pulp.value(model.objective))

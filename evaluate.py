@@ -66,7 +66,7 @@ def evaluate_dqn(
         return []
 
     try:
-        agent.policy_net.load_state_dict(torch.load(model_path))
+        agent.policy_net.load_state_dict(torch.load(model_path,weights_only=True))
         agent.policy_net.eval()
     except Exception as e:
         print(f"Error loading model parameters: {e}")

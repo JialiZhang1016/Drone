@@ -70,20 +70,23 @@ def plot_epsilon_decay(total_episodes, linear_params_list, exponential_params_li
 
 if __name__ == "__main__":
     # Define total number of training episodes
-    total_episodes = 300000
+    total_episodes = 10000
     
     # Define different parameter settings for linear decay strategy
     linear_params_list = [
-        {'max_episodes': 300000, 'min_epsilon': 0.01},
+        {'max_episodes': 10000, 'min_epsilon': 0.01},
         # {'max_episodes': 8000, 'min_epsilon': 0.01},
         # {'max_episodes': 6000, 'min_epsilon': 0.01}
     ]
     
     # Define different parameter settings for exponential decay strategy
     exponential_params_list = [
-        {'epsilon_start': 0.4, 'epsilon_end': 0.001, 'decay_rate': 300}
-        # {'epsilon_start': 1.0, 'epsilon_end': 0.05, 'decay_rate': 3000},
-        # {'epsilon_start': 1.0, 'epsilon_end': 0.1, 'decay_rate': 1000}
+        {'epsilon_start': 1.0, 'epsilon_end': 0.01, 'decay_rate': 500},
+        {'epsilon_start': 1.0, 'epsilon_end': 0.01, 'decay_rate': 500},
+        {'epsilon_start': 1.0, 'epsilon_end': 0.01, 'decay_rate': 1000},
+        {'epsilon_start': 1.0, 'epsilon_end': 0.001, 'decay_rate': 800},
+        {'epsilon_start': 1.0, 'epsilon_end': 0.001, 'decay_rate': 1000}
+
     ]
     
     # Plot ε decay curves

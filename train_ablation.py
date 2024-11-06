@@ -10,9 +10,9 @@ from collections import deque
 import os
 from datetime import datetime
 import time
-import csv  # Import csv module for writing CSV files
-from plot_results import plot_results  # Ensure this function is correctly implemented
-from evaluate import evaluate_dqn  # Import the evaluation function
+import csv
+from plot_results import plot_results
+from evaluate import evaluate_dqn
 
 def train_dqn(
     config_file='config/config_5.json',
@@ -30,15 +30,16 @@ def train_dqn(
     seed=42,
     success_rate_interval=100,
     moving_average_interval=100,
-    save_interval=100,
+    save_epochs=None,  # Changed from save_interval to save_epochs
     results_base_dir='runs',
-    use_action_mask=True  # Added parameter to control action mask usage
+    use_action_mask=True
 ) -> str:
     """
     Train a DQN agent for drone route planning.
 
     Parameters:
         ... [Parameters as previously defined]
+        save_epochs (list): List of episode numbers at which to save the model.
         use_action_mask (bool): Whether to use the action mask during training.
 
     Returns:
@@ -99,7 +100,7 @@ def train_dqn(
         "seed": seed,
         "success_rate_interval": success_rate_interval,
         "moving_average_interval": moving_average_interval,
-        "save_interval": save_interval,
+        "save_epochs": save_epochs,  # Changed from save_interval
         "results_base_dir": results_base_dir,
         "use_action_mask": use_action_mask,  # Include the use_action_mask parameter
         "env_config": config  # Include the environment configuration
@@ -118,6 +119,9 @@ def train_dqn(
     moving_average_rewards = []
     
     time_start = time.time()
+
+    if save_epochs is None:
+        save_epochs = [num_episodes]
 
     for episode in range(num_episodes):
         state, _ = env.reset()
@@ -172,12 +176,15 @@ def train_dqn(
             moving_avg_reward = sum(recent_rewards) / len(recent_rewards)
             moving_average_rewards.append(moving_avg_reward)
 
-        if (episode + 1) % save_interval == 0:
-            print(f"Episode {episode + 1}/{num_episodes}, Total Reward: {total_reward:.2f}")
+        # Save model at specified epochs
+        if (episode + 1) in save_epochs:
+            model_filename = f'policy_net_{episode + 1}.pth'
+            torch.save(agent.policy_net.state_dict(), os.path.join(results_dir, model_filename))
+            print(f"Model saved at episode {episode + 1}")
 
     time_end = time.time()
-    # Save model parameters
-    torch.save(agent.policy_net.state_dict(), os.path.join(results_dir, 'policy_net.pth'))
+    # Save final model parameters
+    torch.save(agent.policy_net.state_dict(), os.path.join(results_dir, 'policy_net_final.pth'))
     
     # Save metric data
     np.save(os.path.join(results_dir, 'all_rewards.npy'), np.array(all_rewards))
@@ -211,17 +218,12 @@ def update_config(original_config_path, new_weather_prob, output_config_path):
     
     print(f"Updated config saved to {output_config_path} with weather_prob={new_weather_prob}")
 
-# weather_probs = [0.2, 0.5, 0.8, 1.0]
-
 if __name__ == "__main__":
-    # Original configuration file
-    original_config_file = 'config/config_10.json'
-    
-    # Weather probabilities to iterate over
-    weather_probs = [0.2, 0.5, 0.8, 1.0]
     # Training parameters
     num_episodes = 10000
-    use_action_mask = True
+    save_epochs = [1000,5000,10000]
+    is_mask_list = [True, False]
+    locations = ["config/config_5.json", "config/config_10.json", "config/config_20.json"]
     batch_size = 64
     epsilon_start = 1.0
     epsilon_end = 0.01
@@ -234,82 +236,79 @@ if __name__ == "__main__":
     seed = 42
     success_rate_interval = 50
     moving_average_interval = 50
-    save_interval = 1000
-    results_base_dir = 'runs'
-    updated_config_dir = 'config/updated_configs'  # Directory to save updated config files
-    
-    # Ensure the results and updated config directories exist
-    os.makedirs(results_base_dir, exist_ok=True)
-    os.makedirs(updated_config_dir, exist_ok=True)
-    
+
     # Initialize a list to store summary data
     summary_data = []
-    
-    for wp in weather_probs:
-        # Define a unique config filename for each weather_prob
-        config_filename = f"config_5_wp_{wp}.json"
-        config_path = os.path.join(updated_config_dir, config_filename)
-            
-        # Update the config with the new weather_prob
-        update_config(original_config_file, wp, config_path)
-                
-        # Train the DQN agent with the updated config and use_action_mask setting
-        results_dir = train_dqn(
-            config_file=config_path,
-            num_episodes=num_episodes,
-            batch_size=batch_size,
-            epsilon_start=epsilon_start,
-            epsilon_end=epsilon_end,
-            epsilon_decay=epsilon_decay,
-            target_update_freq=target_update_freq,
-            memory_size=memory_size,
-            gamma=gamma,
-            seed=seed,
-            success_rate_interval=success_rate_interval,
-            moving_average_interval=moving_average_interval,
-            save_interval=save_interval,
-            results_base_dir=results_base_dir,
-            use_action_mask=use_action_mask  # Pass the use_action_mask parameter
-        )
-                
-        # Plot the results after training
-        plot_results(results_dir=results_dir)
-                
-        # Evaluate the trained model
-        evaluation_results = evaluate_dqn(
-            config_file=config_path,
-            model_path=os.path.join(results_dir, 'policy_net.pth'),
-            num_episodes=1000,  # Adjust as needed
-            seed=seed,
-            verbose=False,  # Set to True if you want detailed logs
-            use_action_mask=use_action_mask  # Pass the use_action_mask parameter if needed
-        )
-                
-        # Calculate average reward and average steps
-        avg_reward = np.mean([res['total_reward'] for res in evaluation_results])
-        avg_steps = np.mean([res['steps'] for res in evaluation_results])
-                
-        # Append the results to summary_data
-        summary_data.append({
-            'weather_prob': wp,
-            'use_action_mask': use_action_mask,
-            'avg_reward': avg_reward,
-            'avg_steps': avg_steps
-        })
-                
-        # Optionally, print the summary for each weather_prob and use_action_mask setting
-        mask_status = "With Mask" if use_action_mask else "Without Mask"
-        print(f"Weather Prob: {wp}, {mask_status}, Avg Reward: {avg_reward:.2f}, Avg Steps: {avg_steps:.2f}\n")
 
-    
-    # After all trainings, save the summary_data to a CSV file
-    summary_csv_path = os.path.join(results_base_dir, 'summary_results.csv')
+    for is_mask in is_mask_list:
+        for config_file in locations:
+
+            # Train the DQN agent
+            results_dir = train_dqn(
+                config_file=config_file,
+                num_episodes=num_episodes,
+                batch_size=batch_size,
+                epsilon_start=epsilon_start,
+                epsilon_end=epsilon_end,
+                epsilon_decay=epsilon_decay,
+                target_update_freq=target_update_freq,
+                memory_size=memory_size,
+                gamma=gamma,
+                seed=seed,
+                success_rate_interval=success_rate_interval,
+                moving_average_interval=moving_average_interval,
+                save_epochs=save_epochs,
+                use_action_mask=is_mask  # Pass the is_mask parameter
+            )
+
+            # Plot the results after training (optional)
+            plot_results(results_dir=results_dir)
+
+            # For each saved model at specified epochs
+            for epoch in save_epochs:
+                model_filename = f'policy_net_{epoch}.pth'
+                model_path = os.path.join(results_dir, model_filename)
+
+                # Evaluate the trained model
+                evaluation_results = evaluate_dqn(
+                    config_file=config_file,
+                    model_path=model_path,
+                    num_episodes=1000,  # Adjust as needed
+                    seed=seed,
+                    verbose=False,  # Set to True if you want detailed logs
+                    use_action_mask=is_mask  # Pass the use_action_mask parameter
+                )
+
+                # Calculate average reward and average steps
+                avg_reward = np.mean([res['total_reward'] for res in evaluation_results])
+                avg_steps = np.mean([res['steps'] for res in evaluation_results])
+
+                # Extract location number from config_file
+                location_num = int(config_file.split('_')[-1].split('.')[0])
+
+                # Append the results to summary_data
+                summary_data.append({
+                    'location': location_num,
+                    'epoch': epoch,
+                    'is_mask': 'TRUE' if is_mask else 'FALSE',
+                    'avg_reward': avg_reward,
+                    'avg_steps': avg_steps
+                })
+
+                # Optionally, print the summary
+                mask_status = "TRUE" if is_mask else "FALSE"
+                print(f"Location: {location_num}, Epoch: {epoch}, Is_Mask: {mask_status}, "
+                      f"Avg Reward: {avg_reward:.2f}, Avg Steps: {avg_steps:.2f}")
+
+    # After all trainings and evaluations, save the summary_data to a CSV file
+    os.makedirs(os.path.join('runs', 'ablation_study'), exist_ok=True)
+    summary_csv_path = os.path.join('runs/ablation_study', 'summary.csv')
     with open(summary_csv_path, mode='w', newline='') as csv_file:
-        fieldnames = ['weather_prob', 'use_action_mask', 'avg_reward', 'avg_steps']
+        fieldnames = ['location', 'epoch', 'is_mask', 'avg_reward', 'avg_steps']
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
 
         writer.writeheader()
         for data in summary_data:
             writer.writerow(data)
-    
+
     print(f"Summary of results saved to {summary_csv_path}")
