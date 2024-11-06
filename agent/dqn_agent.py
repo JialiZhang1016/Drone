@@ -1,5 +1,3 @@
-# dqn_agent.py
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -7,10 +5,11 @@ import numpy as np
 import random
 
 class DQNAgent:
-    def __init__(self, env, num_time_bins=5, hidden_size=128, learning_rate=1e-3, gamma=0.99):
+    def __init__(self, env, num_time_bins=5, hidden_size=128, learning_rate=1e-3, gamma=0.99, use_action_mask=True):
         self.env = env
         self.num_time_bins = num_time_bins
         self.gamma = gamma
+        self.use_action_mask = use_action_mask  # New parameter to control action mask usage
         
         # Discretize action space
         self.action_list = self._discretize_actions()
@@ -43,12 +42,12 @@ class DQNAgent:
             for t in time_values:
                 action_list.append((loc, round(float(t), 2)))
         return action_list
-    
+        
     def _get_state_size(self):
         # Size of state vector
-        # current_location (1) + remaining_time (1) + visited (m+1) + weather (1)
+        # current_location (1) + remaining_time (1) + visited (m+1) + weather (2)
         return 1 + 1 + (self.env.m + 1) + 2
-    
+        
     def state_to_tensor(self, state):
         current_location = state['current_location']
         remaining_time = state['remaining_time'][0]
@@ -70,7 +69,7 @@ class DQNAgent:
             weather_one_hot
         ))
         return torch.FloatTensor(state_vector)
-    
+        
     def get_valid_action_mask(self, state):
         mask = np.zeros(len(self.action_list), dtype=bool)
         current_location = state['current_location']
@@ -93,23 +92,33 @@ class DQNAgent:
                 continue
             mask[idx] = True
         return mask
-    
+        
     def select_action(self, state, epsilon):
-        valid_actions = np.where(self.get_valid_action_mask(state))[0]
-        if len(valid_actions) == 0:
-            return None  # No valid actions
-        if random.random() < epsilon:
-            return random.choice(valid_actions)
+        if self.use_action_mask:
+            valid_actions = np.where(self.get_valid_action_mask(state))[0]
+            if len(valid_actions) == 0:
+                return None  # No valid actions
+            if random.random() < epsilon:
+                return random.choice(valid_actions)
+            else:
+                with torch.no_grad():
+                    state_tensor = self.state_to_tensor(state)
+                    q_values = self.policy_net(state_tensor)
+                    q_values = q_values.detach().numpy()
+                    # Mask invalid actions
+                    invalid_actions = np.setdiff1d(np.arange(len(self.action_list)), valid_actions)
+                    q_values[invalid_actions] = -np.inf
+                    return np.argmax(q_values)
         else:
-            with torch.no_grad():
-                state_tensor = self.state_to_tensor(state)
-                q_values = self.policy_net(state_tensor)
-                q_values = q_values.detach().numpy()
-                # Mask invalid actions
-                invalid_actions = np.setdiff1d(np.arange(len(self.action_list)), valid_actions)
-                q_values[invalid_actions] = -np.inf
-                return np.argmax(q_values)
-    
+            # Do not use action mask
+            if random.random() < epsilon:
+                return random.randrange(self.action_size)
+            else:
+                with torch.no_grad():
+                    state_tensor = self.state_to_tensor(state)
+                    q_values = self.policy_net(state_tensor)
+                    return torch.argmax(q_values).item()
+        
     def optimize_model(self, batch):
         batch_state, batch_action, batch_reward, batch_next_state, batch_done = zip(*batch)
         
@@ -126,14 +135,18 @@ class DQNAgent:
         # Compute V(s_{t+1})
         with torch.no_grad():
             next_q_values = self.target_net(batch_next_state_tensor)
-            next_state_values = torch.zeros(len(batch_next_state))
-            for idx, next_state in enumerate(batch_next_state):
-                mask = self.get_valid_action_mask(next_state)
-                if mask.any():
-                    next_q_values[idx][~torch.tensor(mask)] = -float('inf')
-                    next_state_values[idx] = next_q_values[idx].max()
-                else:
-                    next_state_values[idx] = 0.0  # No valid actions
+            if self.use_action_mask:
+                next_state_values = torch.zeros(len(batch_next_state))
+                for idx, next_state in enumerate(batch_next_state):
+                    mask = self.get_valid_action_mask(next_state)
+                    if mask.any():
+                        next_q_values[idx][~torch.tensor(mask)] = -float('inf')
+                        next_state_values[idx] = next_q_values[idx].max()
+                    else:
+                        next_state_values[idx] = 0.0  # No valid actions
+            else:
+                # Do not use action mask
+                next_state_values = next_q_values.max(1)[0]
             expected_state_action_values = batch_reward_tensor + (self.gamma * next_state_values * (1 - batch_done_tensor))
         
         # Compute loss
@@ -143,7 +156,7 @@ class DQNAgent:
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-    
+        
 class DQN(nn.Module):
     def __init__(self, state_size, action_size, hidden_size=128):
         super(DQN, self).__init__()

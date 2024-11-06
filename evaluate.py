@@ -13,7 +13,8 @@ def evaluate_dqn(
     model_path: str,
     num_episodes: int = 1,
     seed: int = 42,
-    verbose: bool = True
+    verbose: bool = True,
+    use_action_mask: bool = True
 ) -> list:
     """
     Evaluate a trained DQN agent on the DroneRoutePlanningEnv.
@@ -54,7 +55,7 @@ def evaluate_dqn(
 
     # Initialize agent
     try:
-        agent = DQNAgent(env)
+        agent = DQNAgent(env, use_action_mask=use_action_mask)
     except Exception as e:
         print(f"Error initializing DQNAgent: {e}")
         return []

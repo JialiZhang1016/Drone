@@ -1,3 +1,4 @@
+# train.py
 import gymnasium as gym
 from drone_env import DroneRoutePlanningEnv
 from agent.dqn_agent import DQNAgent
@@ -23,17 +24,22 @@ def train_dqn(
     target_update_freq=10,
     memory_size=10000,
     gamma=0.99,
+    learning_rate=1e-3,
+    num_time_bins=5,
+    hidden_size=128,
     seed=42,
     success_rate_interval=100,
     moving_average_interval=100,
     save_interval=100,
-    results_base_dir='runs'
+    results_base_dir='runs',
+    use_action_mask=True  # Added parameter to control action mask usage
 ) -> str:
     """
     Train a DQN agent for drone route planning.
 
     Parameters:
         ... [Parameters as previously defined]
+        use_action_mask (bool): Whether to use the action mask during training.
 
     Returns:
         results_dir (str): Directory where the training results are saved.
@@ -51,8 +57,13 @@ def train_dqn(
     torch.manual_seed(seed)
     env.reset(seed=seed)
     
-    # Initialize agent
-    agent = DQNAgent(env)
+    # Initialize agent with use_action_mask parameter
+    agent = DQNAgent(env, 
+                     use_action_mask=use_action_mask, 
+                     gamma=gamma, 
+                     learning_rate=learning_rate, 
+                     num_time_bins=num_time_bins, 
+                     hidden_size=hidden_size)
     
     # Initialize replay memory
     memory = deque(maxlen=memory_size)
@@ -82,11 +93,15 @@ def train_dqn(
         "target_update_freq": target_update_freq,
         "memory_size": memory_size,
         "gamma": gamma,
+        "learning_rate": learning_rate,
+        "num_time_bins": num_time_bins,
+        "hidden_size": hidden_size,
         "seed": seed,
         "success_rate_interval": success_rate_interval,
         "moving_average_interval": moving_average_interval,
         "save_interval": save_interval,
         "results_base_dir": results_base_dir,
+        "use_action_mask": use_action_mask,  # Include the use_action_mask parameter
         "env_config": config  # Include the environment configuration
     }
 
@@ -204,9 +219,9 @@ if __name__ == "__main__":
     
     # Weather probabilities to iterate over
     weather_probs = [0.2, 0.5, 0.8, 1.0]
-    
     # Training parameters
     num_episodes = 1000
+    use_action_mask = True
     batch_size = 64
     epsilon_start = 1.0
     epsilon_end = 0.01
@@ -214,6 +229,8 @@ if __name__ == "__main__":
     target_update_freq = 50
     memory_size = 1000
     gamma = 0.99
+    num_time_bins = 5
+    hidden_size = 128
     seed = 42
     success_rate_interval = 50
     moving_average_interval = 50
@@ -229,65 +246,66 @@ if __name__ == "__main__":
     summary_data = []
     
     for wp in weather_probs:
-        try:
-            # Define a unique config filename for each weather_prob
-            config_filename = f"config_5_wp_{wp}.json"
-            config_path = os.path.join(updated_config_dir, config_filename)
+        # Define a unique config filename for each weather_prob
+        config_filename = f"config_5_wp_{wp}.json"
+        config_path = os.path.join(updated_config_dir, config_filename)
             
-            # Update the config with the new weather_prob
-            update_config(original_config_file, wp, config_path)
-            
-            # Train the DQN agent with the updated config
-            results_dir = train_dqn(
-                config_file=config_path,
-                num_episodes=num_episodes,
-                batch_size=batch_size,
-                epsilon_start=epsilon_start,
-                epsilon_end=epsilon_end,
-                epsilon_decay=epsilon_decay,
-                target_update_freq=target_update_freq,
-                memory_size=memory_size,
-                gamma=gamma,
-                seed=seed,
-                success_rate_interval=success_rate_interval,
-                moving_average_interval=moving_average_interval,
-                save_interval=save_interval,
-                results_base_dir=results_base_dir
-            )
-            
-            # Plot the results after training
-            plot_results(results_dir=results_dir)
-            
-            # Evaluate the trained model
-            evaluation_results = evaluate_dqn(
-                config_file=config_path,
-                model_path=os.path.join(results_dir, 'policy_net.pth'),
-                num_episodes=1000,  # Adjust as needed
-                seed=seed,
-                verbose=False  # Set to True if you want detailed logs
-            )
-            
-            # Calculate average reward and average steps
-            avg_reward = np.mean([res['total_reward'] for res in evaluation_results])
-            avg_steps = np.mean([res['steps'] for res in evaluation_results])
-            
-            # Append the results to summary_data
-            summary_data.append({
-                'weather_prob': wp,
-                'avg_reward': avg_reward,
-                'avg_steps': avg_steps
-            })
-            
-            # Optionally, print the summary for each weather_prob
-            print(f"Weather Prob: {wp}, Avg Reward: {avg_reward:.2f}, Avg Steps: {avg_steps:.2f}\n")
-        
-        except Exception as e:
-            print(f"An error occurred for weather_prob={wp}: {e}\n")
+        # Update the config with the new weather_prob
+        update_config(original_config_file, wp, config_path)
+                
+        # Train the DQN agent with the updated config and use_action_mask setting
+        results_dir = train_dqn(
+            config_file=config_path,
+            num_episodes=num_episodes,
+            batch_size=batch_size,
+            epsilon_start=epsilon_start,
+            epsilon_end=epsilon_end,
+            epsilon_decay=epsilon_decay,
+            target_update_freq=target_update_freq,
+            memory_size=memory_size,
+            gamma=gamma,
+            seed=seed,
+            success_rate_interval=success_rate_interval,
+            moving_average_interval=moving_average_interval,
+            save_interval=save_interval,
+            results_base_dir=results_base_dir,
+            use_action_mask=use_action_mask  # Pass the use_action_mask parameter
+        )
+                
+        # Plot the results after training
+        plot_results(results_dir=results_dir)
+                
+        # Evaluate the trained model
+        evaluation_results = evaluate_dqn(
+            config_file=config_path,
+            model_path=os.path.join(results_dir, 'policy_net.pth'),
+            num_episodes=1000,  # Adjust as needed
+            seed=seed,
+            verbose=False,  # Set to True if you want detailed logs
+            use_action_mask=use_action_mask  # Pass the use_action_mask parameter if needed
+        )
+                
+        # Calculate average reward and average steps
+        avg_reward = np.mean([res['total_reward'] for res in evaluation_results])
+        avg_steps = np.mean([res['steps'] for res in evaluation_results])
+                
+        # Append the results to summary_data
+        summary_data.append({
+            'weather_prob': wp,
+            'use_action_mask': use_action_mask,
+            'avg_reward': avg_reward,
+            'avg_steps': avg_steps
+        })
+                
+        # Optionally, print the summary for each weather_prob and use_action_mask setting
+        mask_status = "With Mask" if use_action_mask else "Without Mask"
+        print(f"Weather Prob: {wp}, {mask_status}, Avg Reward: {avg_reward:.2f}, Avg Steps: {avg_steps:.2f}\n")
+
     
     # After all trainings, save the summary_data to a CSV file
     summary_csv_path = os.path.join(results_base_dir, 'summary_results.csv')
     with open(summary_csv_path, mode='w', newline='') as csv_file:
-        fieldnames = ['weather_prob', 'avg_reward', 'avg_steps']
+        fieldnames = ['weather_prob', 'use_action_mask', 'avg_reward', 'avg_steps']
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
 
         writer.writeheader()
