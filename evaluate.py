@@ -30,10 +30,6 @@ def evaluate_dqn(
         List[dict]: A list of dictionaries containing episode results.
                     Each dictionary includes 'episode', 'total_reward', and 'steps'.
     """
-    # Set random seeds for reproducibility
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
 
     # Load configuration file
     try:
@@ -107,7 +103,7 @@ def evaluate_dqn(
                 steps += 1
 
         if verbose:
-            print(f"Episode {episode}/{num_episodes}, Total Reward: {total_reward:.2f}, Steps: {steps}")
+            print(f"Episode {episode}/{num_episodes}, Total Reward: {total_reward:.2f}, Steps: {steps}, Seed: {seed}")
 
         # Append episode results
         results.append({
@@ -131,12 +127,18 @@ if __name__ == "__main__":
         # config_file="config/config_10.json",
         # model_path="runs/2024-10-26_19:29:04_10_6000/policy_net.pth",
 
-        config_file="config/config_20.json",
-        model_path="runs/2024-10-26_19:37:50_20_6000/policy_net.pth",
+        config_file="config/updated_configs/config_10_wp_0.2.json",
+        model_path="outputs/2024-11-06_20:42:11_wp_0.2_10_5000/policy_net.pth",
+
+        # config_file="config/updated_configs/config_20_wp_0.2.json",
+        # model_path="outputs/2024-11-06_20:46:12_wp_0.2_20_5000/policy_net.pth",
+
+
 
         num_episodes=1000,
-        seed=42,
-        verbose=False
+        seed = random.randint(0, 100000),
+        verbose=True,
+        use_action_mask=False
     )
 
     num_eval_episodes = 1000

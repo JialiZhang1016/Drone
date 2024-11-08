@@ -1,0 +1,32 @@
+[
+    {
+        "total_reward": -9449.0,
+        "steps": 4,
+        "seed": 908314126,
+        "evaluation": 1
+    },
+    {
+        "total_reward": -9448.0,
+        "steps": 4,
+        "seed": 1521562001,
+        "evaluation": 2
+    },
+    {
+        "total_reward": -9459.0,
+        "steps": 4,
+        "seed": 1592456250,
+        "evaluation": 3
+    },
+    {
+        "total_reward": -9459.0,
+        "steps": 4,
+        "seed": 1214787211,
+        "evaluation": 4
+    },
+    {
+        "total_reward": -9459.0,
+        "steps": 4,
+        "seed": 4115787076,
+        "evaluation": 5
+    }
+]
