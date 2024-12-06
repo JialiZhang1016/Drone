@@ -128,8 +128,8 @@ if __name__ == "__main__":
     # config_file = "config/updated_configs/config_10_wp_0.5.json"
     # model_path = "outputs/2024-11-06_20:43:11_wp_0.5_10_5000/policy_net.pth"
 
-    config_file = "config/updated_configs/config_10_wp_0.2.json"
-    model_path = "outputs/2024-11-06_20:42:11_wp_0.2_10_5000/policy_net.pth"
+    config_file = "config/realword_8/config_8.json"
+    model_path = "runs/2024-12-05_18:15:46_wp_0.6_8_10000/policy_net_10000.pth"
     
     # 评估次数
     num_evaluations = 10
