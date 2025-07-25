@@ -1,0 +1,9 @@
+Metric,Value,Description
+Total Training Episodes,2000,Complete training duration
+Final Average Reward,795.32,Average reward of final model (1000 episodes)
+Peak Average Reward,840.10,Best performance at epoch 1000
+Final Success Rate,99%+,Percentage of successful episodes
+Optimal Path Length,5 steps,Average steps to complete task
+Training Time,60.96 seconds,Total training duration
+Network Architecture,128-128 hidden layers,DQN neural network structure
+Learning Rate,0.001,Adam optimizer learning rate

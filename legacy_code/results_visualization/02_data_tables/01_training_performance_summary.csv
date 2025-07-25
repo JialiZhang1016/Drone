@@ -1,0 +1,5 @@
+Training_Phase,Episodes,Average_Reward,Std_Reward,Max_Reward,Min_Reward,Success_Rate,Average_Episode_Length
+Early Training,0-500,-3876.98,4904.44,794.37,-9584.12,0.550,7.3
+Mid Training,500-1500,-723.66,3445.41,864.18,-9506.12,0.862,6.8
+Late Training,1500-2000,682.26,780.47,848.83,-9374.49,0.994,6.0
+Overall,0-2000,-1160.51,3858.79,864.18,-9584.12,0.817,6.7

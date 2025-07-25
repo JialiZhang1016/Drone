@@ -1,0 +1,6 @@
+Model,Final Avg Reward,Success Rate (%),Training Time (s),Invalid Actions,Safety Violations,Constraint Violations
+Vanilla DQN,24546.54,95.0,37.7,0,415,386
+DQN with Action Masking,706.07,100.0,13.0,0,67,0
+DQN with Safety Mechanism,20444.04,100.0,30.2,0,101,0
+DQN with Constraint Checking,1.21,100.0,1.4,0,0,0
+Complete Intelligent Agent,706.07,100.0,15.5,0,67,0

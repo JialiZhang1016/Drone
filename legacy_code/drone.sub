@@ -1,0 +1,27 @@
+#!/bin/bash  
+#SBATCH --job-name=drone_route_planning  
+#SBATCH --nodes=1  
+#SBATCH --ntasks=1  
+#SBATCH --mem=100G  
+#SBATCH --partition=gpu  
+#SBATCH --time=7:00:00  
+#SBATCH --gres=gpu:V100-SXM2-32GB
+#SBATCH --mail-type=BEGIN,FAIL,END  
+#SBATCH --mail-user=jztk7@mst.edu  
+#SBATCH --output=runs/output/Mill-%j.out
+#SBATCH --error=runs/output/Mill-%j.err
+
+# Load necessary modules
+module load anaconda
+conda create -n drone python=3.12
+conda activate drone
+conda install requirements.txt
+
+# Debugging: Print environment details
+echo "Environment activated"
+which python
+python --version
+
+# Run YOLOv10 training command
+python train_ablation.py
+

@@ -1,0 +1,4 @@
+Epoch,Average_Reward,Average_Steps,Evaluation_Episodes
+500,624.2,7.0,1000
+1000,840.1,6.0,1000
+2000,795.32,5.0,1000
