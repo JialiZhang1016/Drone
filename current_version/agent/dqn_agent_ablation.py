@@ -73,12 +73,12 @@ class IntelligentDQNAgent:
         return action_list
         
     def _get_state_size(self):
-        """获取状态向量大小"""
-        # current_location (1) + remaining_time (1) + visited (m+1) + weather (2)
-        return 1 + 1 + (self.env.m + 1) + 2
+        """获取状态向量大小，天气向量大小变为3"""
+        # current_location (1) + remaining_time (1) + visited (m+1) + weather (3)
+        return 1 + 1 + (self.env.m + 1) + 3
         
     def state_to_tensor(self, state):
-        """将状态转换为张量"""
+        """将状态转换为张量，天气使用one-hot编码（大小为3）"""
         current_location = state['current_location']
         remaining_time = state['remaining_time'][0]
         visited = state['visited']
@@ -87,8 +87,8 @@ class IntelligentDQNAgent:
         # Normalize remaining_time
         remaining_time /= self.env.T_max
         
-        # Convert weather to one-hot encoding
-        weather_one_hot = np.zeros(2)
+        # 天气 one-hot 编码，大小为3
+        weather_one_hot = np.zeros(3)
         weather_one_hot[weather] = 1
         
         # Construct state vector
@@ -128,10 +128,8 @@ class IntelligentDQNAgent:
         remaining_time = state['remaining_time'][0]
         weather = state['weather']
         
-        # 计算到目标的飞行时间
-        T_flight_to_next = self.env.get_flight_time(current_location, loc, weather)
-        
-        # 计算期望返回时间
+        # Agent不知道下一步的确切天气，所以它必须依赖环境提供的期望时间
+        T_flight_to_next = self.env.get_expected_return_time(current_location) # 使用期望时间
         T_return = self.env.get_expected_return_time(loc)
         
         # 检查剩余时间约束

@@ -11,9 +11,11 @@ from collections import deque
 import random
 import torch
 import os
+import sys
 
 from drone_env import PureDroneRoutePlanningEnv
 from agent.dqn_agent_ablation import IntelligentDQNAgent
+
 
 def set_random_seed(seed=42):
     """Set random seed for reproducibility"""
@@ -36,7 +38,7 @@ class ExperienceReplay:
     def __len__(self):
         return len(self.buffer)
 
-def train_model_with_clear_responsibilities(model_config, num_episodes=2000, seed=42):
+def train_model_with_clear_responsibilities(model_config, config_file, num_episodes=5000, seed=42):
     """
     使用明确职责划分的训练函数
     
@@ -47,11 +49,13 @@ def train_model_with_clear_responsibilities(model_config, num_episodes=2000, see
     set_random_seed(seed)
     
     # Load environment configuration
-    with open('config/realword_8/config_8.json', 'r') as f:
+    with open(config_file, 'r') as f:
         env_config = json.load(f)
     
     # 创建纯粹的物理环境（不做任何智能决策）
-    env = PureDroneRoutePlanningEnv(env_config)
+    # 从模型配置中获取 reward shaping 的设置
+    use_shaping = model_config.get('use_reward_shaping', True)  # 默认为True以兼容旧配置
+    env = PureDroneRoutePlanningEnv(env_config, use_reward_shaping=use_shaping)
     
     # 创建智能Agent（负责所有智能决策）
     agent = IntelligentDQNAgent(
@@ -171,6 +175,7 @@ def train_model_with_clear_responsibilities(model_config, num_episodes=2000, see
     results = {
         'model_name': model_config['name'],
         'model_config': model_config,
+        'config_file': config_file,
         
         # 基础性能指标
         'episode_rewards': episode_rewards,
@@ -197,54 +202,64 @@ def train_model_with_clear_responsibilities(model_config, num_episodes=2000, see
     
     return results
 
-def run_ablation_experiments():
+def run_ablation_experiments(config_file):
     """运行修正后的消融实验"""
     
-    # 重新定义5个模型配置
+    # 重新定义6个模型配置（增加reward shaping控制）
     model_configs = [
         {
-            'name': 'Vanilla DQN',
+            'name': '1. Vanilla DQN',
             'description': 'No intelligent components, direct RL on physical environment',
             'use_action_mask': False,
             'use_safety_mechanism': False,
-            'use_constraint_check': False
+            'use_constraint_check': False,
+            'use_reward_shaping': False # No Shaping
         },
         {
-            'name': 'DQN with Action Masking',
+            'name': '2. Vanilla + Shaping', # 新增：专门测试Shaping效果
+            'description': 'Vanilla DQN with only Reward Shaping enabled',
+            'use_action_mask': False,
+            'use_safety_mechanism': False,
+            'use_constraint_check': False,
+            'use_reward_shaping': True # Only Shaping
+        },
+        {
+            'name': '3. DQN + Action Masking',
             'description': 'Add action masking to filter invalid actions',
             'use_action_mask': True,
             'use_safety_mechanism': False,
-            'use_constraint_check': False
+            'use_constraint_check': False,
+            'use_reward_shaping': False # No Shaping
         },
         {
-            'name': 'DQN with Safety Mechanism',
-            'description': 'Add 20% safety margin forced return home',
-            'use_action_mask': False,
-            'use_safety_mechanism': True,
-            'use_constraint_check': False
-        },
-        {
-            'name': 'DQN with Constraint Checking',
-            'description': 'Add time constraint checking',
-            'use_action_mask': False,
-            'use_safety_mechanism': False,
-            'use_constraint_check': True
-        },
-        {
-            'name': 'Complete Intelligent Agent',
-            'description': 'All intelligent components enabled',
+            'name': '4. Complete w/o Shaping', # 修正：这才是真正的“无Shaping完整体”
+            'description': 'All components enabled, but with simple reward function',
             'use_action_mask': True,
             'use_safety_mechanism': True,
-            'use_constraint_check': True
+            'use_constraint_check': True,
+            'use_reward_shaping': False # No Shaping
+        },
+        {
+            'name': '5. Complete Agent (All On)', # 最终版
+            'description': 'All intelligent components enabled with reward shaping',
+            'use_action_mask': True,
+            'use_safety_mechanism': True,
+            'use_constraint_check': True,
+            'use_reward_shaping': True # With Shaping
         }
     ]
     
     all_results = []
     
+    # 从配置文件名称中提取location数量
+    config_name = os.path.basename(config_file).replace('.json', '')
+    num_locations = config_name.split('_')[-1]
+    
     print("=" * 80)
-    print("CORRECTED ABLATION STUDY: Clear Responsibility Division")
+    print(f"ABLATION STUDY: {num_locations} Locations Configuration")
     print("Environment: Pure physical simulation (no intelligence)")
     print("Agent: All intelligent decision making")
+    print(f"Config File: {config_file}")
     print("=" * 80)
     
     # Run each model configuration
@@ -254,10 +269,11 @@ def run_ablation_experiments():
         print(f"Description: {config['description']}")
         print(f"Components: Action_Mask={config['use_action_mask']}, "
               f"Safety={config['use_safety_mechanism']}, "
-              f"Constraint={config['use_constraint_check']}")
+              f"Constraint={config['use_constraint_check']}, "
+              f"Reward_Shaping={config['use_reward_shaping']}")
         print(f"{'-'*60}")
         
-        results = train_model_with_clear_responsibilities(config, num_episodes=1500, seed=42)
+        results = train_model_with_clear_responsibilities(config, config_file, num_episodes=1500, seed=42)
         all_results.append(results)
         
         print(f"\nResults for {config['name']}:")
@@ -272,9 +288,9 @@ def run_ablation_experiments():
         print(f"    Safety Violations: {results['total_env_safety_violations']}")
         print(f"    Constraint Violations: {results['total_env_constraint_violations']}")
     
-    return all_results
+    return all_results, num_locations
 
-def create_ablation_visualizations(all_results):
+def create_ablation_visualizations(all_results, num_locations):
     """创建修正后的消融实验可视化"""
     
     # Set up plotting style
@@ -286,7 +302,7 @@ def create_ablation_visualizations(all_results):
     
     # 1. 主要性能对比图
     fig, axes = plt.subplots(2, 2, figsize=(16, 12))
-    fig.suptitle('Ablation Study: Component Contribution Analysis', 
+    fig.suptitle(f'Ablation Study: {num_locations} Locations - Component Contribution Analysis', 
                  fontsize=16, fontweight='bold')
     
     # Plot 1: Learning Curves
@@ -371,9 +387,8 @@ def create_ablation_visualizations(all_results):
     ax4.grid(True, alpha=0.3, axis='y')
     
     plt.tight_layout()
-    plt.savefig('ablation_results/ablation_analysis.png', 
+    plt.savefig(f'ablation_results/ablation_analysis_{num_locations}locations.png', 
                 dpi=300, bbox_inches='tight')
-    plt.show()
     
     # 2. 创建详细的组件贡献分析表
     analysis_df = pd.DataFrame({
@@ -381,6 +396,7 @@ def create_ablation_visualizations(all_results):
         'Action Mask': [result['model_config']['use_action_mask'] for result in all_results],
         'Safety Mechanism': [result['model_config']['use_safety_mechanism'] for result in all_results],
         'Constraint Check': [result['model_config']['use_constraint_check'] for result in all_results],
+        'Reward Shaping': [result['model_config']['use_reward_shaping'] for result in all_results],
         'Final Reward': [f"{result['final_avg_reward']:.2f}" for result in all_results],
         'Success Rate (%)': [f"{result['final_success_rate']*100:.1f}" for result in all_results],
         'Training Time (s)': [f"{result['training_time']:.1f}" for result in all_results],
@@ -391,10 +407,10 @@ def create_ablation_visualizations(all_results):
     })
     
     # Save analysis table
-    analysis_df.to_csv('ablation_results/ablation_analysis.csv', index=False)
+    analysis_df.to_csv(f'ablation_results/ablation_analysis_{num_locations}locations.csv', index=False)
     
-    print("\n" + "="*80)
-    print("ABALATION STUDY RESULTS")
+    print(f"\n" + "="*80)
+    print(f"ABLATION STUDY RESULTS: {num_locations} Locations")
     print("="*80)
     print(analysis_df.to_string(index=False))
     
@@ -411,8 +427,17 @@ def create_ablation_visualizations(all_results):
     print(f"   Reward change: {model3_reward - model1_reward:.2f}")
     print(f"   Safety interventions: {all_results[2]['total_safety_interventions']}")
     
-    print(f"3. Complete System:")
-    model5_reward = all_results[4]['final_avg_reward']
+    print(f"3. Reward Shaping Contribution:")
+    if len(all_results) >= 5:
+        model4_reward = all_results[3]['final_avg_reward']  # Complete w/o Shaping
+        model5_reward = all_results[4]['final_avg_reward']  # Complete Agent (All On)
+        print(f"   Reward change: {model5_reward - model4_reward:.2f}")
+        print(f"   Complete system without shaping: {model4_reward:.2f}")
+        print(f"   Complete system with shaping: {model5_reward:.2f}")
+    else:
+        print(f"   Not enough models for comparison")
+    
+    print(f"4. Complete System:")
     model5_success = all_results[4]['final_success_rate']
     print(f"   Final reward: {model5_reward:.2f}")
     print(f"   Success rate: {model5_success*100:.1f}%")
@@ -421,16 +446,202 @@ def create_ablation_visualizations(all_results):
     
     return analysis_df
 
-if __name__ == "__main__":
-    print("Starting Ablation Experiments...")
+def run_single_experiment(config_file):
+    """运行单个配置文件的消融实验"""
+    print(f"Starting Ablation Experiments for {config_file}...")
     
     # Run experiments
-    results = run_ablation_experiments()
+    results, num_locations = run_ablation_experiments(config_file)
     
     # Create visualizations and analysis
-    print("\nCreating analysis and visualizations...")
-    analysis_table = create_ablation_visualizations(results)
+    print(f"\nCreating analysis and visualizations for {num_locations} locations...")
+    analysis_table = create_ablation_visualizations(results, num_locations)
     
-    print(f"\nAblation study completed!")
+    print(f"\nAblation study for {num_locations} locations completed!")
     print(f"Results saved in 'ablation_results/' directory")
     print("="*80)
+    
+    return results, analysis_table
+
+def run_all_configurations():
+    """运行所有三个配置文件的消融实验"""
+    config_files = ['config/config_5.json', 'config/config_8.json', 'config/config_10.json']
+    
+    all_results_summary = {}
+    
+    print("="*80)
+    print("RUNNING ABLATION EXPERIMENTS FOR ALL CONFIGURATIONS")
+    print("="*80)
+    
+    for i, config_file in enumerate(config_files, 1):
+        if os.path.exists(config_file):
+            print(f"\n{'='*80}")
+            print(f"EXPERIMENT {i}/3: {config_file}")
+            print(f"{'='*80}")
+            
+            try:
+                results, analysis_table = run_single_experiment(config_file)
+                
+                # 保存每个配置的结果摘要
+                config_name = os.path.basename(config_file).replace('.json', '')
+                all_results_summary[config_name] = {
+                    'results': results,
+                    'analysis_table': analysis_table,
+                    'config_file': config_file
+                }
+                
+                print(f"\n✓ Experiment {i}/3 completed successfully!")
+                
+            except Exception as e:
+                print(f"\n✗ Experiment {i}/3 failed with error: {e}")
+                continue
+        else:
+            print(f"\n✗ Config file {config_file} not found, skipping...")
+    
+    # 创建跨配置的对比分析
+    if len(all_results_summary) > 1:
+        create_cross_config_comparison(all_results_summary)
+    
+    print(f"\n{'='*80}")
+    print("ALL EXPERIMENTS COMPLETED!")
+    print(f"Results saved in 'ablation_results/' directory")
+    print("="*80)
+    
+    return all_results_summary
+
+def create_cross_config_comparison(all_results_summary):
+    """创建跨配置的对比分析"""
+    print(f"\nCreating cross-configuration comparison...")
+    
+    # 创建跨配置对比图
+    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+    fig.suptitle('Cross-Configuration Ablation Study Comparison', 
+                 fontsize=16, fontweight='bold')
+    
+    # 提取数据
+    config_names = []
+    final_rewards = []
+    success_rates = []
+    training_times = []
+    env_safety_violations = []
+    
+    model_names = ['Vanilla DQN', 'DQN with Action Masking', 'DQN with Safety Mechanism', 
+                   'DQN with Constraint Checking', 'Complete Intelligent Agent']
+    
+    for config_name, data in all_results_summary.items():
+        config_names.append(config_name)
+        results = data['results']
+        
+        # 收集每个模型的最终性能
+        config_final_rewards = []
+        config_success_rates = []
+        config_training_times = []
+        config_env_safety_violations = []
+        
+        for result in results:
+            config_final_rewards.append(result['final_avg_reward'])
+            config_success_rates.append(result['final_success_rate'] * 100)
+            config_training_times.append(result['training_time'])
+            config_env_safety_violations.append(result['total_env_safety_violations'])
+        
+        final_rewards.append(config_final_rewards)
+        success_rates.append(config_success_rates)
+        training_times.append(config_training_times)
+        env_safety_violations.append(config_env_safety_violations)
+    
+    # Plot 1: Final Rewards Comparison
+    ax1 = axes[0, 0]
+    x = np.arange(len(model_names))
+    width = 0.25
+    
+    for i, config_name in enumerate(config_names):
+        ax1.bar(x + i*width, final_rewards[i], width, label=config_name, alpha=0.8)
+    
+    ax1.set_xlabel('Model')
+    ax1.set_ylabel('Final Average Reward')
+    ax1.set_title('Final Performance Across Configurations')
+    ax1.set_xticks(x + width)
+    ax1.set_xticklabels(model_names, rotation=45, ha='right')
+    ax1.legend()
+    ax1.grid(True, alpha=0.3, axis='y')
+    
+    # Plot 2: Success Rates Comparison
+    ax2 = axes[0, 1]
+    for i, config_name in enumerate(config_names):
+        ax2.bar(x + i*width, success_rates[i], width, label=config_name, alpha=0.8)
+    
+    ax2.set_xlabel('Model')
+    ax2.set_ylabel('Success Rate (%)')
+    ax2.set_title('Safety Performance Across Configurations')
+    ax2.set_xticks(x + width)
+    ax2.set_xticklabels(model_names, rotation=45, ha='right')
+    ax2.legend()
+    ax2.grid(True, alpha=0.3, axis='y')
+    
+    # Plot 3: Training Time Comparison
+    ax3 = axes[1, 0]
+    for i, config_name in enumerate(config_names):
+        ax3.bar(x + i*width, training_times[i], width, label=config_name, alpha=0.8)
+    
+    ax3.set_xlabel('Model')
+    ax3.set_ylabel('Training Time (seconds)')
+    ax3.set_title('Training Efficiency Across Configurations')
+    ax3.set_xticks(x + width)
+    ax3.set_xticklabels(model_names, rotation=45, ha='right')
+    ax3.legend()
+    ax3.grid(True, alpha=0.3, axis='y')
+    
+    # Plot 4: Environment Safety Violations Comparison
+    ax4 = axes[1, 1]
+    for i, config_name in enumerate(config_names):
+        ax4.bar(x + i*width, env_safety_violations[i], width, label=config_name, alpha=0.8)
+    
+    ax4.set_xlabel('Model')
+    ax4.set_ylabel('Environment Safety Violations')
+    ax4.set_title('Safety Violations Across Configurations')
+    ax4.set_xticks(x + width)
+    ax4.set_xticklabels(model_names, rotation=45, ha='right')
+    ax4.legend()
+    ax4.grid(True, alpha=0.3, axis='y')
+    
+    plt.tight_layout()
+    plt.savefig('ablation_results/cross_config_comparison.png', 
+                dpi=300, bbox_inches='tight')
+    
+    # 创建跨配置对比表
+    comparison_data = []
+    for config_name, data in all_results_summary.items():
+        results = data['results']
+        for i, result in enumerate(results):
+            comparison_data.append({
+                'Configuration': config_name,
+                'Model': result['model_name'],
+                'Final Reward': f"{result['final_avg_reward']:.2f}",
+                'Success Rate (%)': f"{result['final_success_rate']*100:.1f}",
+                'Training Time (s)': f"{result['training_time']:.1f}",
+                'Env Safety Violations': result['total_env_safety_violations'],
+                'Env Constraint Violations': result['total_env_constraint_violations'],
+                'Action Mask Rejections': result['total_action_mask_rejections'],
+                'Safety Interventions': result['total_safety_interventions']
+            })
+    
+    comparison_df = pd.DataFrame(comparison_data)
+    comparison_df.to_csv('ablation_results/cross_config_comparison.csv', index=False)
+    
+    print(f"\nCross-configuration comparison saved:")
+    print(f"  - Chart: ablation_results/cross_config_comparison.png")
+    print(f"  - Data: ablation_results/cross_config_comparison.csv")
+    
+    return comparison_df
+
+if __name__ == "__main__":
+    # 检查命令行参数
+    if len(sys.argv) > 1:
+        config_file = sys.argv[1]
+        if not os.path.exists(config_file):
+            print(f"Error: Config file {config_file} not found!")
+            sys.exit(1)
+        run_single_experiment(config_file)
+    else:
+        # 默认运行所有三个配置
+        run_all_configurations()
