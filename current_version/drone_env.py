@@ -89,13 +89,13 @@ class PureDroneRoutePlanningEnv(gym.Env):
     
     def step(self, action):
         """
-        环境step函数（添加严格动作验证）：
+        环境step函数（修复重复访问漏洞）：
         1. 验证动作有效性，无效动作立即终止episode并给大负奖励
         2. 更新天气（随机）
         3. 计算飞行时间
-        4. 更新状态（位置、剩余时间、访问历史）
-        5. 计算奖励
-        6. 判断是否结束
+        4. 先计算基于当前状态的奖励（修复重复访问漏洞）
+        5. 再更新状态（位置、剩余时间、访问历史）
+        6. 最后处理回合结束和惩罚
         """
         if self.done:
             raise RuntimeError("Episode has finished. Call reset() to start a new episode.")
@@ -103,54 +103,7 @@ class PureDroneRoutePlanningEnv(gym.Env):
         L_next, T_data_next = action
         L_next = int(L_next)
         T_data_next = float(T_data_next)
-        
-        # ===== 严格动作验证 =====
-        violation_penalty = -1000  # 大负奖励
-        violation_reason = None
-        
-        # 1. 检查位置是否有效
-        if L_next < 0 or L_next > self.m:
-            violation_reason = f"Invalid location {L_next} (valid range: 0-{self.m})"
-        
-        # 2. 检查是否尝试访问已访问的非Home地点
-        elif L_next != 0 and self.V_t[L_next] == 1:
-            violation_reason = f"Attempted to revisit location {L_next}"
-        
-        # 3. 检查数据收集时间是否在有效范围内
-        elif T_data_next < self.T_data_lower[L_next] or T_data_next > self.T_data_upper[L_next]:
-            violation_reason = f"Invalid data collection time {T_data_next} for location {L_next} (valid range: {self.T_data_lower[L_next]}-{self.T_data_upper[L_next]})"
-        
-        # 4. 检查是否从当前位置移动到自己
-        elif L_next == self.L_t:
-            violation_reason = f"Invalid action: staying at current location {L_next}"
-        
-        # 如果发现违规，立即终止episode
-        if violation_reason is not None:
-            self.done = True
-            self.constraint_violations += 1
-            reward = violation_penalty
-            self.total_reward += reward
-            
-            observation = self._get_observation()
-            info = {
-                'action': {
-                    'next_location': int(L_next),
-                    'data_collection_time': round(float(T_data_next), 2)
-                },
-                'next_state': {
-                    'current_location': int(self.L_t),
-                    'remaining_time': round(float(self.T_t_rem), 2),
-                    'visited': self.V_t.tolist(),
-                    'weather': 'Good' if self.W_t == 0 else 'Bad'
-                },
-                'reward': round(float(reward), 2),
-                'total_reward': round(float(self.total_reward), 2),
-                'visited_locations': self.visit_order,
-                'violation': True,
-                'violation_reason': violation_reason
-            }
-            return observation, reward, self.done, info
-        
+           
         # ===== 正常动作执行 =====
         
         # Weather update (物理环境的随机性)
@@ -159,8 +112,17 @@ class PureDroneRoutePlanningEnv(gym.Env):
         # Calculate flight time (物理定律)
         T_flight_to_next = self._get_flight_time(self.L_t, L_next, self.W_t)
         
-        # Update remaining time (物理状态更新)
-        self.T_t_rem -= (T_flight_to_next + T_data_next)
+        # 增加数据收集时间的不确定性
+        # 实际花费时间可能比计划多0%到30%
+        uncertainty_factor = np.random.uniform(1.0, 1.3) 
+        actual_T_data_next = T_data_next * uncertainty_factor
+        
+        # 1. 先计算基于当前状态的奖励（修复重复访问漏洞）
+        reward = self._calculate_reward(L_next, T_data_next, T_flight_to_next)
+        self.total_reward += reward
+        
+        # 2. 再更新状态（使用实际花费的时间）
+        self.T_t_rem -= (T_flight_to_next + actual_T_data_next)
         
         # Check for natural consequences of the action
         if self.T_t_rem < 0:
@@ -173,9 +135,8 @@ class PureDroneRoutePlanningEnv(gym.Env):
         self.visit_order.append(L_next)
         
         observation = self._get_observation()
-        reward = self._calculate_reward(L_next, T_data_next, T_flight_to_next)
-        self.total_reward += reward
 
+        # 3. 最后处理回合结束和惩罚
         self.done = self._check_done()
 
         # 如果任务结束时没在Home，这是一个自然的"安全违反"
@@ -189,7 +150,9 @@ class PureDroneRoutePlanningEnv(gym.Env):
         info = {
             'action': {
                 'next_location': int(L_next),
-                'data_collection_time': round(float(T_data_next), 2)
+                'planned_data_collection_time': round(float(T_data_next), 2),
+                'actual_data_collection_time': round(float(actual_T_data_next), 2),
+                'uncertainty_factor': round(float(uncertainty_factor), 2)
             },
             'next_state': {
                 'current_location': int(self.L_t),
@@ -229,17 +192,50 @@ class PureDroneRoutePlanningEnv(gym.Env):
         return T_expected_return
     
     def _calculate_reward(self, L_next, T_data_next, T_flight_to_next):
-        """计算奖励（环境反馈）"""
-        # Data collection reward
-        if self.criticality[L_next] == 'HC':
-            R_data = 10 * T_data_next
-        else:
-            R_data = 2 * T_data_next
+        """
+        计算奖励（环境反馈）+ 奖励塑造（修复重复访问漏洞）
+        """
+        # 1. 基础数据收集奖励和成本（修复重复访问漏洞）
+        R_data = 0
+        # 只有在目的地未被访问过的情况下，才计算数据收益
+        if self.V_t[L_next] == 0:
+            if self.criticality[L_next] == 'HC':
+                R_data = 10 * T_data_next
+            else:
+                R_data = 2 * T_data_next
         
-        # Cost
         C = -1 * (T_data_next + T_flight_to_next)
+        base_reward = R_data + C
+
+        # 2. Risk-Aware 奖励塑造
+        danger_penalty = self._calculate_danger_penalty()
         
-        return R_data + C
+        # 3. 最终奖励
+        shaped_reward = base_reward - danger_penalty
+        return shaped_reward
+
+    def _calculate_danger_penalty(self):
+        """
+        计算基于风险的即时惩罚
+        """
+        T_return_home = self._expected_return_time(self.L_t)
+        safety_margin = 1.5 # 安全系数，可以调整
+        
+        # 危险比例：越高越危险
+        # 当剩余时间远大于所需返航时间时，该比例接近0
+        # 当剩余时间接近所需返航时间时，该比例接近1
+        # 当剩余时间小于所需返航时间时，该比例大于1
+        danger_ratio = (T_return_home * safety_margin) / self.T_t_rem if self.T_t_rem > 0 else float('inf')
+
+        # 惩罚函数：一个简单的指数函数或分段函数
+        # 这里使用一个简单的二次函数作为示例
+        if danger_ratio > 0.8: # 当危险比例超过0.8时开始惩罚
+            penalty_coefficient = 50 # 惩罚系数，可以调整
+            penalty = penalty_coefficient * (danger_ratio - 0.8)**2
+        else:
+            penalty = 0
+            
+        return penalty
     
     
     def _check_done(self):
