@@ -1,6 +1,0 @@
-Model,Action Mask,Safety Mechanism,Constraint Check,Final Reward,Success Rate (%),Training Time (s),Agent Mask Work,Agent Safety Work,Env Safety Violations,Env Constraint Violations
-Vanilla DQN,False,False,False,-261429.13,3.0,66.7,0,0,590,498
-DQN with Action Masking,True,False,False,612.20,100.0,23.4,144660,0,68,0
-DQN with Safety Mechanism,False,True,False,-1706.93,97.0,116.5,34560,26552,133,0
-DQN with Constraint Checking,False,False,True,-2892.10,78.0,274.8,48837,0,159,52
-Complete Intelligent Agent,True,True,True,612.20,100.0,31.2,144660,0,68,0

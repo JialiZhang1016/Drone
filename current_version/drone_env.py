@@ -81,9 +81,11 @@ class PureDroneRoutePlanningEnv(gym.Env):
         # 2. 动态计算飞行时间
         T_flight_to_next = self._get_flight_time(self.L_t, L_next, self.W_t)
         
-        # 3. 计算奖励 (基于计划的 T_data_next)
-        reward = self._calculate_reward(L_next, T_data_next, T_flight_to_next)
-        self.total_reward += reward
+        # 3. 计算分解后的奖励
+        total_reward, base_reward, shaping_bonus = self._calculate_reward(L_next, T_data_next, T_flight_to_next)
+        
+        # 我们仍然使用 total_reward 来更新环境内部的总奖励记录
+        self.total_reward += total_reward
         
         # 4. 更新状态
         self.T_t_rem -= (T_flight_to_next + T_data_next)
@@ -98,14 +100,27 @@ class PureDroneRoutePlanningEnv(gym.Env):
         
         # 5. 处理回合结束和最终惩罚
         self.done = self._check_done()
+        
+        # 将最终惩罚也归入 base_reward，因为它属于核心任务的一部分
+        final_penalty = 0.0
         if self.done and self.L_t != 0:
-            reward -= self.P_penalty
-            self.total_reward -= self.P_penalty
+            final_penalty = -self.P_penalty
+            self.total_reward -= self.P_penalty  # 更新环境内部总奖励
             self.safety_violations += 1
-
+            
+        # 准备 info 字典，包含所有分解后的奖励信息
+        info = {
+            'reward_total': total_reward + final_penalty,
+            'reward_base': base_reward + final_penalty,  # 核心任务收益
+            'reward_shaping': shaping_bonus              # 塑形收益
+        }
+        
         self.timestep += 1
-        info = { 'reward': reward } # Info可以简化
-        return observation, reward, self.done, info
+        
+        # Agent学习时，仍然使用包含了所有信号的总奖励
+        learning_reward = total_reward + final_penalty
+        
+        return observation, learning_reward, self.done, info
     
     def _get_flight_time(self, L_from, L_to, weather):
         """动态、随机地计算飞行时间"""
@@ -153,14 +168,21 @@ class PureDroneRoutePlanningEnv(gym.Env):
                 R_data = 2 * T_data_next
         
         C = -1 * (T_data_next + T_flight_to_next)
-        base_reward = R_data + C
+        base_reward = R_data + C  # 这是"任务核心收益"
         
+        shaping_bonus = 0.0  # 默认为0
         if self.use_reward_shaping:
-            # 将惩罚改为奖励
-            safety_bonus = self._calculate_safety_bonus()
-            return base_reward + safety_bonus  # 注意这里是加号
-        else:
-            return base_reward
+            # (这里是您在方案二中修改后的代码)
+            if self.L_t != 0 and self.T_t_rem > 0:
+                T_return_home = self._expected_return_time(self.L_t)
+                safety_ratio = T_return_home / self.T_t_rem
+                bonus_coefficient = 1  # 建议使用一个较低的系数
+                shaping_bonus = bonus_coefficient * max(0, 1 - safety_ratio)
+
+        total_reward = base_reward + shaping_bonus
+        
+        # 返回一个元组，包含所有奖励信息
+        return total_reward, base_reward, shaping_bonus
 
     def _calculate_danger_penalty(self):
         T_return_home = self._expected_return_time(self.L_t)

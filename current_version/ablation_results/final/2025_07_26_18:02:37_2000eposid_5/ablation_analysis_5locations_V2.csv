@@ -1,0 +1,5 @@
+Model,Action Mask,Safety Mechanism,Constraint Check,Reward Shaping,Final Base Reward,Final Shaping Reward,Final Total Reward,Success Rate (%),Training Time (s),Agent Mask Work,Agent Safety Work,Env Safety Violations,Env Constraint Violations
+1. Vanilla DQN,False,False,False,False,-1824.25,0.00,-1824.25,85.0,53.3,0,0,194,77
+2. DQN + Shaping,False,False,False,True,-576.36,23.62,-552.74,94.0,53.7,0,0,143,41
+3. DQN + Action Masking,True,False,False,False,287.14,0.00,287.14,99.0,25.7,71540,0,70,0
+4. Complete Agent,True,False,False,True,370.65,3.03,373.68,100.0,25.5,71360,0,63,0
