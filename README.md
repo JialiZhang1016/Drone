@@ -1,112 +1,105 @@
-# Drone Route Planning with Reinforcement Learning
+# Drone Route Planning with Deep Q-Network (DQN)
 
-This project focuses on developing a reinforcement learning (RL) agent for optimal drone route planning. The agent aims to maximize data collection from various locations while considering factors such as weather conditions, flight time constraints, and criticality levels of locations.
+## Project Overview
+This project implements a reinforcement learning solution for autonomous drone route planning using Deep Q-Network (DQN) with intelligent decision-making components. The system features an ablation study framework to evaluate the contribution of different intelligent components under uncertainty conditions.
 
-## Installation
+## Architecture
 
-### Prerequisites
+### Environment (`drone_env.py`)
+- **Physical Environment**: Handles state transitions and reward calculations
+- **Uncertainty Modeling**: Introduces random uncertainty in data collection time (1.0-1.3x factor)
+- **Risk-Aware Reward Shaping**: Includes danger penalties based on remaining time
+- **State Management**: Tracks visited locations, remaining time, and current position
+- **Validation Rules**: 
+  - No revisiting non-Home locations (repeated visit vulnerability fixed)
+  - Data collection time within bounds
+  - Valid location indices only
+  - No staying at current location
 
-- Python 3.7 or higher
-- `virtualenv` or `venv` for creating a virtual environment
+### Agent (`agent/dqn_agent_ablation.py`)
+- **Intelligent Decision Making**: All smart components centralized in the agent
+- **Components**: Action masking, safety mechanisms, constraint checking
+- **Configurable**: Supports ablation studies with component enable/disable flags
+- **Physical Feasibility**: Binds physical checks with action mask flag
 
-### Steps
+### Key Features
+1. **Action Masking**: Filters invalid actions before selection (155,385 rejections in experiments)
+2. **Safety Mechanism**: 20% time threshold forced return home (26,232 interventions)
+3. **Constraint Checking**: Real-time time constraint validation
+4. **Risk-Aware Rewards**: Danger penalties for time-critical situations
+5. **Uncertainty Handling**: Robust performance under data collection time variations
 
-1. **Clone the Repository**
+## Configuration
+- **Environment Config**: `config/realword_8/config_8.json`
+- **8 Locations + Home Base**: Real-world flight time matrices
+- **Weather-dependent Flight Times**: Good/bad weather scenarios
+- **Critical vs Low-Critical Locations**: HC=10x reward, LC=2x reward
 
-   ```bash
-   git clone https://github.com/JialiZhang1016/Drone.git
-   cd Drone
-   ```
-2. **Create a Virtual Environment**
+## Reward System
+```
+R_data = 10 * T_data (HC locations) or 2 * T_data (LC locations) [only if unvisited]
+Cost = -1 * (T_data + T_flight)
+Danger_Penalty = 50 * (danger_ratio - 0.8)² [if danger_ratio > 0.8]
+Total_Reward = R_data + Cost - Danger_Penalty
+```
 
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate  # On Windows, use 'venv\Scripts\activate'
-   ```
-3. **Install Dependencies**
+## Uncertainty Features
+- **Data Collection Uncertainty**: Actual time = Planned time × (1.0-1.3 random factor)
+- **Expected vs Actual Tracking**: Environment tracks both planned and actual times
+- **Robustness Testing**: Components evaluated under realistic uncertainty conditions
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+## Ablation Study Models
+1. **Vanilla DQN**: No intelligent components (baseline)
+2. **DQN + Action Masking**: Filters invalid actions only
+3. **DQN + Safety Mechanism**: 20% safety margin forced return home
+4. **DQN + Constraint Checking**: Time constraint validation
+5. **Complete Intelligent Agent**: All components enabled
 
 ## Usage
-
-### Configuration
-
-Before running the training script, you can adjust the parameters in the configuration files located in the `config` directory. Parameters include:
-
-- Number of locations (`num_locations`)
-- Maximum flight time (`T_max`)
-- Weather probabilities (`weather_prob`)
-- Flight times between locations (`T_flight_good`, `T_flight_bad`)
-- Data collection time bounds (`T_data_lower`, `T_data_upper`)
-- Criticality levels (`criticality`)
-
-### Training the Agent
-
-To train the DQN agent:
-
 ```bash
-python train.py
+# Run ablation experiments
+python3 ablation_study.py
+
+# Run simple test
+python3 simple_test.py
 ```
 
-The results will be saved in the `runs` directory, named with the format `num_locations_num_episodes_timestamp`.
+## Experimental Results (Under Uncertainty)
 
-### Plotting Results
+### Performance Comparison
+| Model | Final Reward | Success Rate | Training Time | Key Statistics |
+|-------|-------------|--------------|---------------|----------------|
+| Vanilla DQN | -144,091.42 | 13% | 56.3s | 753 safety violations |
+| Action Masking | **629.46** | **99%** | **24.0s** | 155,385 mask rejections |
+| Safety Mechanism | -1,202.07 | 99% | 105.8s | 26,232 safety interventions |
+| Constraint Checking | -279.11 | 100% | 201.2s | 1,903,766 constraint violations |
+| Complete Agent | **629.46** | **99%** | **30.4s** | All components active |
 
-To visualize training results:
+### Key Insights
+1. **Action Masking Dominance**: Most effective component under uncertainty
+2. **Safety Mechanism Value**: Maintains 99% success rate despite negative rewards
+3. **Uncertainty Impact**: Vanilla DQN performance severely degraded
+4. **Component Synergy**: Complete agent matches action masking performance
 
-```bash
-python plot_results.py
-```
+## Technical Improvements
+- **Fixed Repeated Visit Vulnerability**: Reward calculation before state update
+- **Enhanced Error Handling**: Corrected UnboundLocalError in optimization loop
+- **Uncertainty Integration**: Realistic data collection time variations
+- **Risk-Aware Design**: Danger penalties for time-critical situations
 
-This will generate plots for:
+## Results Directory
+- **Ablation Results**: `ablation_results/` - Comprehensive analysis and visualizations
+- **Configuration Files**: `config/` - Environment and experiment configurations
+- **Agent Implementation**: `agent/` - DQN agent with intelligent components
 
-- Total Reward per Episode
-- Average Loss per Episode
-- Episode Length
-- Epsilon Decay
-- Success Rate
-- Average Reward
-- Moving Average Reward
-
-Plots will be saved in the corresponding `runs` directory.
-
-### Evaluating the Agent
-
-To evaluate a trained agent:
-
-```bash
-python evaluate.py
-```
-
-## Agents
-
-### DQN Agent
-
-Located at `agent/dqn_agent.py`, this agent uses a Deep Q-Network to learn the optimal policy for route planning.
-
-### Random Agent
-
-Located at `agent/random_agent.py`, this agent selects actions randomly and serves as a baseline for comparison.
-
-## Environment
-
-The custom drone environment is defined in `drone_env.py`, following the OpenAI Gym interface. Key components include:
-
-- **Observation Space**: Includes current location, remaining time, visited locations, and weather conditions.
-- **Action Space**: Consists of the next location to visit and the data collection time at that location.
-- **Reward Function**: Calculates rewards based on data collected and costs incurred.
-- **Constraints**: Enforces flight time limitations, data collection time bounds, and safety considerations.
-
-## Results
-
-Training results and model checkpoints are stored in the `runs` directory. Each run folder contains:
-
-- Saved model (`policy_net.pth`)
-- Numpy arrays of recorded metrics (e.g., `all_rewards.npy`, `all_losses.npy`)
-- Plots of the training metrics (if generated)
+## Dependencies
+- Python 3.x
+- PyTorch
+- NumPy
+- Matplotlib
+- Seaborn
+- Pandas
+- Gymnasium
 
 ## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
