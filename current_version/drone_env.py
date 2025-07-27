@@ -134,22 +134,26 @@ class PureDroneRoutePlanningEnv(gym.Env):
             delay_factor = np.random.uniform(self.extreme_delay_range[0], self.extreme_delay_range[1])
             return base_time * delay_factor
 
-    def _expected_return_time(self, L_from):
-        """计算包含所有天气情况的期望返回时间"""
-        T_return_good = self.T_flight_good[L_from, 0]
+    def get_expected_flight_time(self, L_from, L_to):
+        """
+        计算从L_from到L_to的期望飞行时间，综合考虑所有天气情况。
+        这个函数是旧版_expected_return_time的通用版本。
+        """
+        # 核心改动：从查询固定到基地0的时间，改为查询到任意目的地L_to的时间
+        base_time = self.T_flight_good[L_from, L_to]
         
         # 计算坏天气和极端天气下的平均飞行时间
         avg_bad_delay = (self.bad_delay_range[0] + self.bad_delay_range[1]) / 2
-        T_return_bad_avg = T_return_good * avg_bad_delay
+        time_bad_avg = base_time * avg_bad_delay
         
         avg_extreme_delay = (self.extreme_delay_range[0] + self.extreme_delay_range[1]) / 2
-        T_return_extreme_avg = T_return_good * avg_extreme_delay
+        time_extreme_avg = base_time * avg_extreme_delay
         
-        # 根据概率加权求和
-        T_expected_return = (self.p_good * T_return_good) + \
-                            (self.p_bad * T_return_bad_avg) + \
-                            (self.p_extreme * T_return_extreme_avg)
-        return T_expected_return
+        # 根据天气概率加权求和
+        T_expected = (self.p_good * base_time) + \
+                     (self.p_bad * time_bad_avg) + \
+                     (self.p_extreme * time_extreme_avg)
+        return T_expected
 
     def _get_observation(self):
         return {
@@ -174,7 +178,8 @@ class PureDroneRoutePlanningEnv(gym.Env):
         if self.use_reward_shaping:
             # (这里是您在方案二中修改后的代码)
             if self.L_t != 0 and self.T_t_rem > 0:
-                T_return_home = self._expected_return_time(self.L_t)
+                # 使用新的通用函数计算返航时间
+                T_return_home = self.get_expected_flight_time(self.L_t, 0)
                 safety_ratio = T_return_home / self.T_t_rem
                 bonus_coefficient = 1  # 建议使用一个较低的系数
                 shaping_bonus = bonus_coefficient * max(0, 1 - safety_ratio)
@@ -185,7 +190,8 @@ class PureDroneRoutePlanningEnv(gym.Env):
         return total_reward, base_reward, shaping_bonus
 
     def _calculate_danger_penalty(self):
-        T_return_home = self._expected_return_time(self.L_t)
+        # 使用新的通用函数
+        T_return_home = self.get_expected_flight_time(self.L_t, 0)
         safety_margin = 1.5
         danger_ratio = (T_return_home * safety_margin) / self.T_t_rem if self.T_t_rem > 0 else float('inf')
         if danger_ratio > 0.8:
@@ -199,7 +205,8 @@ class PureDroneRoutePlanningEnv(gym.Env):
         """计算一个基于安全状态的奖励"""
         # 如果不在家，计算安全奖励
         if self.L_t != 0 and self.T_t_rem > 0:
-            T_return_home = self._expected_return_time(self.L_t)
+            # 使用新的通用函数
+            T_return_home = self.get_expected_flight_time(self.L_t, 0)
             
             # 剩余时间与返航时间的安全比率
             # 如果剩余时间是返航时间的3倍，则 safety_ratio 约为 0.66
@@ -223,7 +230,8 @@ class PureDroneRoutePlanningEnv(gym.Env):
     
     # 辅助查询接口
     def get_expected_return_time(self, L_from):
-        return self._expected_return_time(L_from)
+        """向后兼容的函数，调用新的通用函数"""
+        return self.get_expected_flight_time(L_from, 0)
         
     def is_location_visited(self, location):
         return self.V_t[location] == 1

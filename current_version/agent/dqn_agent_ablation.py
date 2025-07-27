@@ -129,8 +129,8 @@ class IntelligentDQNAgent:
         weather = state['weather']
         
         # Agent不知道下一步的确切天气，所以它必须依赖环境提供的期望时间
-        T_flight_to_next = self.env.get_expected_return_time(current_location) # 使用期望时间
-        T_return = self.env.get_expected_return_time(loc)
+        T_flight_to_next = self.env.get_expected_flight_time(current_location, loc) # 从当前位置到目标位置
+        T_return = self.env.get_expected_flight_time(loc, 0) # 从目标位置返回家
         
         # 检查剩余时间约束
         total_time_needed = T_flight_to_next + t_data + T_return
