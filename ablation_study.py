@@ -502,6 +502,42 @@ def create_ablation_visualizations(all_results, num_locations, output_dir='ablat
     config_file_name = os.path.basename(config_file)
     shutil.copy2(config_file, f'{output_dir}/{config_file_name}')
     
+    # 定义模型配置（在函数内部定义，避免全局变量依赖）
+    model_configs = [
+        {
+            'name': '1. Vanilla DQN',
+            'description': 'No intelligent components, direct RL on physical environment',
+            'use_action_mask': False,
+            'use_safety_mechanism': False,
+            'use_constraint_check': False,
+            'use_reward_shaping': False
+        },
+        {
+            'name': '2. DQN + Shaping',
+            'description': 'DQN with only Reward Shaping enabled',
+            'use_action_mask': False,
+            'use_safety_mechanism': False,
+            'use_constraint_check': False,
+            'use_reward_shaping': True
+        },
+        {
+            'name': '3. DQN + Action Masking',
+            'description': 'DQN with action masking to filter invalid actions',
+            'use_action_mask': True,
+            'use_safety_mechanism': False,
+            'use_constraint_check': False,
+            'use_reward_shaping': False
+        },
+        {
+            'name': '4. Complete Agent',
+            'description': 'All intelligent components enabled with reward shaping',
+            'use_action_mask': True,
+            'use_safety_mechanism': False,
+            'use_constraint_check': False,
+            'use_reward_shaping': True
+        }
+    ]
+    
     # 保存完整的实验配置
     experiment_config = {
         'experiment_info': {
@@ -513,40 +549,7 @@ def create_ablation_visualizations(all_results, num_locations, output_dir='ablat
         'training_params': TRAINING_PARAMS,
         'evaluation_params': EVALUATION_PARAMS,
         'visualization_params': VISUALIZATION_PARAMS,
-        'model_configs': [
-            {
-                'name': '1. Vanilla DQN',
-                'description': 'No intelligent components, direct RL on physical environment',
-                'use_action_mask': False,
-                'use_safety_mechanism': False,
-                'use_constraint_check': False,
-                'use_reward_shaping': False
-            },
-            {
-                'name': '2. DQN + Shaping',
-                'description': 'DQN with only Reward Shaping enabled',
-                'use_action_mask': False,
-                'use_safety_mechanism': False,
-                'use_constraint_check': False,
-                'use_reward_shaping': True
-            },
-            {
-                'name': '3. DQN + Action Masking',
-                'description': 'DQN with action masking to filter invalid actions',
-                'use_action_mask': True,
-                'use_safety_mechanism': False,
-                'use_constraint_check': False,
-                'use_reward_shaping': False
-            },
-            {
-                'name': '4. Complete Agent',
-                'description': 'All intelligent components enabled with reward shaping',
-                'use_action_mask': True,
-                'use_safety_mechanism': False,
-                'use_constraint_check': False,
-                'use_reward_shaping': True
-            }
-        ]
+        'model_configs': model_configs
     }
     
     with open(f'{output_dir}/experiment_config.json', 'w') as f:

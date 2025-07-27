@@ -92,7 +92,7 @@ class RuleBasedAgent(HeuristicAgent):
             t_return_expected_future = self.env.get_expected_flight_time(loc_next, 0)
 
             if remaining_time >= time_cost + t_return_expected_future:
-                 candidate_actions.append(action)
+                candidate_actions.append((idx, action))
 
         if not candidate_actions:
             for idx, action in self.action_index_mapping.items():
@@ -100,17 +100,17 @@ class RuleBasedAgent(HeuristicAgent):
                     return idx # 无可选动作，返航
 
         # 规则2: 优先访问高价值(HC)地点
-        hc_actions = [a for a in candidate_actions if self.env.criticality[a[0]] == 'HC']
+        hc_actions = [a for a in candidate_actions if self.env.criticality[a[1][0]] == 'HC']
         
         if hc_actions:
             target_actions = hc_actions
         else: # 规则3: 如果没有HC地点，则访问低价值(LC)地点
-            target_actions = [a for a in candidate_actions if self.env.criticality[a[0]] == 'LC']
+            target_actions = [a for a in candidate_actions if self.env.criticality[a[1][0]] == 'LC']
 
         # 规则4: 在候选者中选择效用最高的
-        best_action = None
+        best_action_idx = None
         max_utility = -np.inf
-        for action in target_actions:
+        for idx, action in target_actions:
             loc_next, t_data = action
             t_flight_expected = self.env.get_expected_flight_time(current_location, loc_next)
             time_cost = t_flight_expected + t_data
@@ -120,13 +120,11 @@ class RuleBasedAgent(HeuristicAgent):
             
             if utility > max_utility:
                 max_utility = utility
-                best_action = action
+                best_action_idx = idx
         
-        # 找到最佳动作在原始列表中的索引
-        if best_action:
-            for idx, action_map in self.action_index_mapping.items():
-                if action_map == best_action:
-                    return idx
+        # 返回最佳动作索引
+        if best_action_idx is not None:
+            return best_action_idx
         
         # 最后防线：返航
         for idx, action in self.action_index_mapping.items():

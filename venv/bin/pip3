@@ -1,5 +1,5 @@
 #!/bin/sh
-'''exec' "/Users/captainzhang/Documents/1 Research/scheduling/Drone/Drone_route_plainning/new_venv/bin/python3.12" "$0" "$@"
+'''exec' "/Users/captainzhang/Documents/1 Research/scheduling/Drone/Drone_route_plainning/venv/bin/python3.12" "$0" "$@"
 ' '''
 # -*- coding: utf-8 -*-
 import re

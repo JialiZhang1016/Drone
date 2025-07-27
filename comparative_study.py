@@ -111,6 +111,8 @@ def evaluate_policy(model, env, n_eval_episodes=100, is_heuristic=False):
         while not done:
             if is_heuristic:
                 # 启发式智能体需要原始的字典格式观测
+                # 注意：_get_observation() 是私有方法，但在这里是必要的
+                # 因为启发式智能体需要原始格式，而不是封装后的扁平格式
                 raw_obs = env.unwrapped._get_observation()
                 action = model.select_action(raw_obs)
             else: # SB3 RL Agent
@@ -146,8 +148,8 @@ def run_experiments(config_file, output_dir):
 
     # --- 实验配置 ---
     N_SEEDS = 3  # 为节省时间，使用3个随机种子，实际研究建议5-10个
-    TRAIN_TIMESTEPS = 30000 # 训练步数
-    EVAL_EPISODES = 50 # 评估回合数
+    TRAIN_TIMESTEPS = 2000 # 训练步数 
+    EVAL_EPISODES = 500 # 评估回合数
     
     models_to_run = {
         'PPO': {'class': PPO, 'policy': 'MlpPolicy'},
@@ -202,20 +204,23 @@ def run_experiments(config_file, output_dir):
 
 def plot_results(df, output_dir):
     """生成并保存结果图表"""
-    plt.style.use('seaborn-v0_8-whitegrid')
+    try:
+        plt.style.use('seaborn-v0_8-whitegrid')
+    except OSError:
+        plt.style.use('seaborn-whitegrid')
 
     # --- 1. 最终性能柱状图 ---
     fig, axes = plt.subplots(1, 2, figsize=(16, 6))
     fig.suptitle('Comparative Study: Final Performance', fontsize=16)
 
     # a) 平均奖励
-    sns.barplot(data=df, x='model', y='reward_mean', ax=axes[0], ci='sd', capsize=.1)
+    sns.barplot(data=df, x='model', y='reward_mean', ax=axes[0], errorbar='sd', capsize=.1)
     axes[0].set_title('Average Cumulative Reward')
     axes[0].set_ylabel('Reward')
     axes[0].set_xlabel('Model')
     
     # b) 成功率
-    sns.barplot(data=df, x='model', y='success_rate_mean', ax=axes[1], ci='sd', capsize=.1)
+    sns.barplot(data=df, x='model', y='success_rate_mean', ax=axes[1], errorbar='sd', capsize=.1)
     axes[1].set_title('Success Rate (Safe Return to Base)')
     axes[1].set_ylabel('Success Rate')
     axes[1].set_xlabel('Model')
@@ -255,7 +260,7 @@ def aggregate_and_save_results(df, output_dir):
 if __name__ == "__main__":
     # --- 选择一个配置进行实验 ---
     # 您可以修改这里来测试不同的环境配置
-    CONFIG_FILE = 'config/config_10.json'
+    CONFIG_FILE = 'config/config_15.json'
     
     # 创建带时间戳的输出目录
     timestamp = time.strftime("%Y%m%d-%H%M%S")

@@ -11,6 +11,10 @@ __pycache__/
 .idea/
 venv/
 legacy_code/
+ablation_results/
+comparative_results/
+comprehensive_analysis_results/
+
 
 # Logs
 *.log
