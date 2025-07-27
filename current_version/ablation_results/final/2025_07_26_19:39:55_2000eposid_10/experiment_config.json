@@ -1,0 +1,65 @@
+{
+    "experiment_info": {
+        "num_locations": "10",
+        "config_file": "config/config_10.json",
+        "timestamp": "2025_07_26_19:39:55",
+        "num_episodes": 2000
+    },
+    "training_params": {
+        "num_episodes": 2000,
+        "epsilon_start": 1.0,
+        "epsilon_end": 0.02,
+        "epsilon_decay": 0.995,
+        "target_update_freq": 100,
+        "batch_size": 64,
+        "learning_rate": 0.001,
+        "memory_capacity": 10000
+    },
+    "evaluation_params": {
+        "window_size": 50,
+        "final_eval_window": 100,
+        "log_print_interval": 500
+    },
+    "visualization_params": {
+        "plot_window_size": 50,
+        "figure_size": [
+            24,
+            16
+        ],
+        "dpi": 300
+    },
+    "model_configs": [
+        {
+            "name": "1. Vanilla DQN",
+            "description": "No intelligent components, direct RL on physical environment",
+            "use_action_mask": false,
+            "use_safety_mechanism": false,
+            "use_constraint_check": false,
+            "use_reward_shaping": false
+        },
+        {
+            "name": "2. DQN + Shaping",
+            "description": "DQN with only Reward Shaping enabled",
+            "use_action_mask": false,
+            "use_safety_mechanism": false,
+            "use_constraint_check": false,
+            "use_reward_shaping": true
+        },
+        {
+            "name": "3. DQN + Action Masking",
+            "description": "DQN with action masking to filter invalid actions",
+            "use_action_mask": true,
+            "use_safety_mechanism": false,
+            "use_constraint_check": false,
+            "use_reward_shaping": false
+        },
+        {
+            "name": "4. Complete Agent",
+            "description": "All intelligent components enabled with reward shaping",
+            "use_action_mask": true,
+            "use_safety_mechanism": false,
+            "use_constraint_check": false,
+            "use_reward_shaping": true
+        }
+    ]
+}

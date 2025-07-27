@@ -91,4 +91,10 @@ def generate_config(
 
 # 运行此脚本以生成新的配置文件
 if __name__ == "__main__":
-    generate_config()
+    # 生成 m=15 的配置
+    print("Generating config for m=15...")
+    generate_config(num_locations=15, T_max=5000, seed=42)
+    
+    # 生成 m=20 的配置
+    print("Generating config for m=20...")
+    generate_config(num_locations=20, T_max=8000, seed=42)
