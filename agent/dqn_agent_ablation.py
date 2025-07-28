@@ -30,6 +30,14 @@ class IntelligentDQNAgent:
         self.num_time_bins = num_time_bins
         self.gamma = gamma
         
+        # GPU device setup with multi-GPU support
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.num_gpus = torch.cuda.device_count() if torch.cuda.is_available() else 0
+        print(f"DQN Agent using device: {self.device}")
+        print(f"Available GPUs: {self.num_gpus}")
+        if self.num_gpus > 1:
+            print(f"Multi-GPU setup detected: {self.num_gpus} GPUs available")
+        
         # 消融实验控制参数
         self.use_action_mask = use_action_mask
         self.use_safety_mechanism = use_safety_mechanism
@@ -43,9 +51,16 @@ class IntelligentDQNAgent:
         # Define state size
         self.state_size = self._get_state_size()
         
-        # Initialize networks
-        self.policy_net = DQN(self.state_size, self.action_size, hidden_size)
-        self.target_net = DQN(self.state_size, self.action_size, hidden_size)
+        # Initialize networks and move to GPU
+        self.policy_net = DQN(self.state_size, self.action_size, hidden_size).to(self.device)
+        self.target_net = DQN(self.state_size, self.action_size, hidden_size).to(self.device)
+        
+        # Enable multi-GPU if available (DataParallel for multiple GPUs)
+        if self.num_gpus > 1:
+            print(f"Enabling DataParallel across {self.num_gpus} GPUs")
+            self.policy_net = nn.DataParallel(self.policy_net)
+            self.target_net = nn.DataParallel(self.target_net)
+        
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()
         
@@ -98,7 +113,7 @@ class IntelligentDQNAgent:
             visited,
             weather_one_hot
         ))
-        return torch.FloatTensor(state_vector)
+        return torch.FloatTensor(state_vector).to(self.device)
     
     def _is_action_physically_feasible(self, state, action):
         """检查动作的物理可行性（基础约束）"""
@@ -212,7 +227,7 @@ class IntelligentDQNAgent:
             else:
                 with torch.no_grad():
                     state_tensor = self.state_to_tensor(state)
-                    q_values = self.policy_net(state_tensor).cpu().numpy() # 使用 .cpu() 确保在CPU上操作
+                    q_values = self.policy_net(state_tensor).cpu().numpy() # Move to CPU for numpy operations
                     
                     # 创建一个只包含有效动作Q值的副本
                     valid_q_values = q_values[valid_actions]
@@ -237,10 +252,10 @@ class IntelligentDQNAgent:
         batch_state, batch_action, batch_reward, batch_next_state, batch_done = zip(*batch)
         
         batch_state_tensor = torch.stack([self.state_to_tensor(s) for s in batch_state])
-        batch_action_tensor = torch.LongTensor(batch_action)
-        batch_reward_tensor = torch.FloatTensor(batch_reward)
+        batch_action_tensor = torch.LongTensor(batch_action).to(self.device)
+        batch_reward_tensor = torch.FloatTensor(batch_reward).to(self.device)
         batch_next_state_tensor = torch.stack([self.state_to_tensor(s) for s in batch_next_state])
-        batch_done_tensor = torch.FloatTensor(batch_done)
+        batch_done_tensor = torch.FloatTensor(batch_done).to(self.device)
         
         # Compute Q(s_t, a)
         q_values = self.policy_net(batch_state_tensor)
@@ -254,13 +269,13 @@ class IntelligentDQNAgent:
         
         if is_intelligent_mode:
             # 对下一状态应用与当前模型配置相符的动作过滤
-            next_state_values = torch.zeros(len(batch_next_state))
+            next_state_values = torch.zeros(len(batch_next_state), device=self.device)
             for idx, next_state in enumerate(batch_next_state):
                 # 获取在下一个状态时，真正有效的动作
                 valid_actions, _ = self._get_valid_actions(next_state)
                 if len(valid_actions) > 0:
                     # 只在有效动作中寻找最大Q值
-                    valid_mask = torch.zeros(self.action_size, dtype=torch.bool)
+                    valid_mask = torch.zeros(self.action_size, dtype=torch.bool, device=self.device)
                     valid_mask[valid_actions] = True
                     # 将无效动作的Q值设为负无穷
                     next_q_values[idx][~valid_mask] = -float('inf')
