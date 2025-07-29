@@ -54,7 +54,7 @@ from drone_env import PureDroneRoutePlanningEnv
 from agent.dqn_agent_ablation import IntelligentDQNAgent
 
 
-def set_random_seed(seed=42):
+def set_random_seed(seed=123):
     """Set random seed for reproducibility"""
     random.seed(seed)
     np.random.seed(seed)
@@ -305,11 +305,13 @@ def evaluate_saved_model(model_path, model_config, config_file):
 
     # Evaluation metrics
     eval_rewards = []
+    eval_base_rewards = []  # ## MODIFICATION: Track base rewards separately
     eval_success_rates = []
     
     for episode in range(num_eval_episodes):
         state, _ = env.reset()
         total_reward = 0
+        total_base_reward = 0  # ## MODIFICATION: Track base reward
         done = False
 
         while not done:
@@ -326,20 +328,24 @@ def evaluate_saved_model(model_path, model_config, config_file):
             
             state = next_state
             total_reward += reward
+            total_base_reward += info.get('reward_base', 0)  # ## MODIFICATION: Accumulate base reward only
 
         eval_rewards.append(total_reward)
+        eval_base_rewards.append(total_base_reward)  # ## MODIFICATION: Store base reward
         current_location = info.get('next_state', {}).get('current_location', state['current_location'])
         success = (current_location == 0)
         eval_success_rates.append(1 if success else 0)
 
     # Calculate average performance
     avg_eval_reward = np.mean(eval_rewards)
+    avg_eval_base_reward = np.mean(eval_base_rewards)  # ## MODIFICATION: Calculate base reward average
     avg_eval_success_rate = np.mean(eval_success_rates)
 
-    print(f"Evaluation Complete: Avg Reward: {avg_eval_reward:.2f}, Avg Success Rate: {avg_eval_success_rate*100:.1f}%")
+    print(f"Evaluation Complete: Avg Total Reward: {avg_eval_reward:.2f}, Avg Base Reward: {avg_eval_base_reward:.2f}, Avg Success Rate: {avg_eval_success_rate*100:.1f}%")
 
     return {
-        'eval_avg_reward': avg_eval_reward,
+        'eval_avg_reward': avg_eval_reward,  # Keep for backward compatibility
+        'eval_avg_base_reward': avg_eval_base_reward,  # ## MODIFICATION: Return base reward
         'eval_success_rate': avg_eval_success_rate,
     }
 ## MODIFICATION END
@@ -420,8 +426,9 @@ def run_ablation_experiments(config_file, output_dir):
         print(f"\nResults for {config['name']}:")
         print(f"  Final Average Training Reward (last 100 ep): {results['final_avg_reward']:.2f}")
         print(f"  Final Training Success Rate (last 100 ep): {results['final_success_rate']*100:.1f}%")
-        ## MODIFICATION: Print evaluation results
-        print(f"  Deterministic Evaluation Reward (10 ep avg): {results['eval_avg_reward']:.2f}")
+        ## MODIFICATION: Print evaluation results (now shows base reward)
+        print(f"  Deterministic Evaluation Base Reward (10 ep avg): {results['eval_avg_base_reward']:.2f}")
+        print(f"  Deterministic Evaluation Total Reward (10 ep avg): {results['eval_avg_reward']:.2f}")
         print(f"  Deterministic Evaluation Success Rate (10 ep avg): {results['eval_success_rate']*100:.1f}%")
         print(f"  Training Time: {results['training_time']:.2f}s")
         print(f"  Environment Violations (Safety/Constraint): {results['total_env_safety_violations']}/{results['total_env_constraint_violations']}")
@@ -492,14 +499,14 @@ def create_ablation_visualizations(all_results, num_locations, output_dir='ablat
     # ## MODIFICATION: These plots now show the new deterministic evaluation results.
     model_names = [result['model_name'] for result in all_results]
     
-    # Plot 4: Final Evaluation Reward
+    # Plot 4: Final Evaluation Base Reward (核心指标)
     ax4 = axes[1, 0]
-    eval_rewards = [result['eval_avg_reward'] for result in all_results]
-    bars = ax4.bar(model_names, eval_rewards, alpha=0.8, edgecolor='black', color='green')
-    ax4.set_ylabel('Average Reward (Deterministic Evaluation)')
-    ax4.set_title('Final Performance (Evaluation)')
+    eval_base_rewards = [result['eval_avg_base_reward'] for result in all_results]
+    bars = ax4.bar(model_names, eval_base_rewards, alpha=0.8, edgecolor='black', color='green')
+    ax4.set_ylabel('Average Base Reward (Deterministic Evaluation)')
+    ax4.set_title('Final Performance - Pure Task Reward (Evaluation)')
     ax4.grid(True, alpha=0.3, axis='y')
-    for bar, value in zip(bars, eval_rewards):
+    for bar, value in zip(bars, eval_base_rewards):
         height = bar.get_height()
         ax4.text(bar.get_x() + bar.get_width()/2., height, f'{value:.1f}', ha='center', va='bottom', fontweight='bold')
     plt.setp(ax4.get_xticklabels(), rotation=45, ha='right')
@@ -534,12 +541,13 @@ def create_ablation_visualizations(all_results, num_locations, output_dir='ablat
     plt.savefig(f'{output_dir}/ablation_analysis_{num_locations}locations_V3.png', 
                 dpi=VISUALIZATION_PARAMS['dpi'], bbox_inches='tight')
     
-    ## MODIFICATION START: Added evaluation metrics to the summary table.
+    ## MODIFICATION START: Added evaluation metrics to the summary table (using base reward).
     analysis_df = pd.DataFrame({
         'Model': [result['model_name'] for result in all_results],
         'Action Mask': [result['model_config']['use_action_mask'] for result in all_results],
         'Reward Shaping': [result['model_config']['use_reward_shaping'] for result in all_results],
-        'Eval Reward': [f"{result['eval_avg_reward']:.2f}" for result in all_results],
+        'Eval Base Reward': [f"{result['eval_avg_base_reward']:.2f}" for result in all_results],  # Main metric
+        'Eval Total Reward': [f"{result['eval_avg_reward']:.2f}" for result in all_results],  # Reference 
         'Eval Success Rate (%)': [f"{result['eval_success_rate']*100:.1f}" for result in all_results],
         'Training Final Reward (Last 100)': [f"{result['final_avg_reward']:.2f}" for result in all_results],
         'Training Final Success (%) (Last 100)': [f"{result['final_success_rate']*100:.1f}" for result in all_results],
