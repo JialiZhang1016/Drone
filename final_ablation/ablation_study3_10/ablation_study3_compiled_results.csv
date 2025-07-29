@@ -1,0 +1,41 @@
+Experiment,Locations,Weather_Prob,Extreme_Weather_Prob,Group,Model,Action_Mask,Reward_Shaping,Eval_Base_Reward,Eval_Total_Reward,Eval_Success_Rate,Training_Final_Reward,Training_Success_Rate,Training_Time,Safety_Violations,Constraint_Violations
+5_loc_stable,5,0.8,0.05,Stable,1. Vanilla DQN,False,False,435.65,435.65,100.0,424.39,100.0,33.4,83,1
+5_loc_stable,5,0.8,0.05,Stable,2. DQN + Shaping,False,True,-722.29,-668.34,100.0,-691.36,98.0,62.2,152,14
+5_loc_stable,5,0.8,0.05,Stable,3. DQN + Action Masking,True,False,414.4,414.4,100.0,425.7,100.0,26.4,123,0
+5_loc_stable,5,0.8,0.05,Stable,4. Complete Agent,True,True,437.15,440.11,100.0,429.78,100.0,26.9,135,0
+8_loc_stable,8,0.8,0.05,Stable,1. Vanilla DQN,False,False,-5724.03,-5724.03,60.0,-3343.98,83.0,120.2,237,113
+8_loc_stable,8,0.8,0.05,Stable,2. DQN + Shaping,False,True,-7605.07,-7442.85,40.0,-3857.42,74.0,164.6,245,215
+8_loc_stable,8,0.8,0.05,Stable,3. DQN + Action Masking,True,False,444.73,444.73,100.0,142.76,96.0,58.7,129,0
+8_loc_stable,8,0.8,0.05,Stable,4. Complete Agent,True,True,670.52,677.42,100.0,493.78,98.0,58.3,106,0
+15_loc_stable,15,0.8,0.05,Stable,1. Vanilla DQN,False,False,-4711.38,-4711.38,100.0,-4834.54,97.0,342.1,438,491
+15_loc_stable,15,0.8,0.05,Stable,2. DQN + Shaping,False,True,-5463.24,-5247.76,100.0,-6397.81,89.0,328.3,461,504
+15_loc_stable,15,0.8,0.05,Stable,3. DQN + Action Masking,True,False,1488.67,1488.67,100.0,1072.32,98.0,170.5,129,0
+15_loc_stable,15,0.8,0.05,Stable,4. Complete Agent,True,True,1410.29,1424.19,100.0,1266.6,99.0,166.4,98,0
+20_loc_stable,20,0.8,0.05,Stable,1. Vanilla DQN,False,False,-40202.57,-40202.57,0.0,-11853.58,81.0,427.2,648,789
+20_loc_stable,20,0.8,0.05,Stable,2. DQN + Shaping,False,True,-13716.03,-13302.99,80.0,-15080.31,70.0,404.0,723,793
+20_loc_stable,20,0.8,0.05,Stable,3. DQN + Action Masking,True,False,-30767.64,-30767.64,0.0,-9459.0,67.0,279.4,304,0
+20_loc_stable,20,0.8,0.05,Stable,4. Complete Agent,True,True,1317.19,1336.08,100.0,-9975.61,65.0,282.1,189,0
+5_loc_unstable,5,0.5,0.15,Unstable,1. Vanilla DQN,False,False,408.78,408.78,100.0,377.88,100.0,58.5,117,14
+5_loc_unstable,5,0.5,0.15,Unstable,2. DQN + Shaping,False,True,-251.68,-217.58,100.0,-925.84,94.0,79.5,191,33
+5_loc_unstable,5,0.5,0.15,Unstable,3. DQN + Action Masking,True,False,422.18,422.18,100.0,413.36,100.0,26.7,95,0
+5_loc_unstable,5,0.5,0.15,Unstable,4. Complete Agent,True,True,424.68,427.64,100.0,412.17,100.0,26.0,91,0
+8_loc_unstable,8,0.5,0.15,Unstable,1. Vanilla DQN,False,False,666.61,666.61,100.0,653.03,100.0,74.2,64,9
+8_loc_unstable,8,0.5,0.15,Unstable,2. DQN + Shaping,False,True,-2398.95,-2279.14,100.0,-3505.34,83.0,156.2,261,140
+8_loc_unstable,8,0.5,0.15,Unstable,3. DQN + Action Masking,True,False,646.22,646.22,100.0,466.54,98.0,58.5,119,0
+8_loc_unstable,8,0.5,0.15,Unstable,4. Complete Agent,True,True,638.94,644.84,100.0,449.19,98.0,58.2,118,0
+15_loc_unstable,15,0.5,0.15,Unstable,1. Vanilla DQN,False,False,-5672.41,-5672.41,100.0,-5546.2,94.0,330.9,497,563
+15_loc_unstable,15,0.5,0.15,Unstable,2. DQN + Shaping,False,True,-11678.34,-11507.3,70.0,-6558.64,88.0,320.3,508,625
+15_loc_unstable,15,0.5,0.15,Unstable,3. DQN + Action Masking,True,False,1387.28,1387.28,100.0,1363.71,100.0,170.0,106,0
+15_loc_unstable,15,0.5,0.15,Unstable,4. Complete Agent,True,True,1372.63,1386.5,100.0,1347.3,100.0,170.3,116,0
+20_loc_unstable,20,0.5,0.15,Unstable,1. Vanilla DQN,False,False,-33561.81,-33561.81,20.0,-12534.23,79.0,387.4,664,787
+20_loc_unstable,20,0.5,0.15,Unstable,2. DQN + Shaping,False,True,-33433.19,-33107.93,20.0,-8149.95,92.0,427.6,627,795
+20_loc_unstable,20,0.5,0.15,Unstable,3. DQN + Action Masking,True,False,-1945.05,-1945.05,90.0,-5590.24,79.0,287.2,387,0
+20_loc_unstable,20,0.5,0.15,Unstable,4. Complete Agent,True,True,1019.81,1038.68,100.0,-13672.13,54.0,284.4,385,0
+15_loc_extreme,15,0.4,0.2,Extreme,1. Vanilla DQN,False,False,1326.04,1326.04,100.0,717.23,100.0,189.5,305,238
+15_loc_extreme,15,0.4,0.2,Extreme,2. DQN + Shaping,False,True,-9109.09,-8841.21,80.0,-5902.6,92.0,348.1,506,610
+15_loc_extreme,15,0.4,0.2,Extreme,3. DQN + Action Masking,True,False,1288.85,1288.85,100.0,869.4,98.0,166.4,109,0
+15_loc_extreme,15,0.4,0.2,Extreme,4. Complete Agent,True,True,1290.0,1303.87,100.0,892.98,98.0,168.0,122,0
+20_loc_extreme,20,0.4,0.25,Extreme,1. Vanilla DQN,False,False,-17545.62,-17545.62,70.0,-8774.88,91.0,392.6,615,736
+20_loc_extreme,20,0.4,0.25,Extreme,2. DQN + Shaping,False,True,-39972.79,-39244.51,0.0,-10705.83,84.0,375.7,635,807
+20_loc_extreme,20,0.4,0.25,Extreme,3. DQN + Action Masking,True,False,1012.07,1012.07,100.0,465.77,98.0,273.1,158,0
+20_loc_extreme,20,0.4,0.25,Extreme,4. Complete Agent,True,True,701.19,720.06,100.0,-27445.46,11.0,271.1,271,0

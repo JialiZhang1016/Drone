@@ -1,0 +1,5 @@
+Model,Action Mask,Reward Shaping,Eval Base Reward,Eval Total Reward,Eval Success Rate (%),Training Final Reward (Last 100),Training Final Success (%) (Last 100),Training Time (s),Total Env Safety Violations,Total Env Constraint Violations
+1. Vanilla DQN,False,False,-17545.62,-17545.62,70.0,-8774.88,91.0,392.6,615,736
+2. DQN + Shaping,False,True,-39972.79,-39244.51,0.0,-10705.83,84.0,375.7,635,807
+3. DQN + Action Masking,True,False,1012.07,1012.07,100.0,465.77,98.0,273.1,158,0
+4. Complete Agent,True,True,701.19,720.06,100.0,-27445.46,11.0,271.1,271,0

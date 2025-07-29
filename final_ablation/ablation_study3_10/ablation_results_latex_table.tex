@@ -1,0 +1,23 @@
+
+\begin{table}[h]
+\centering
+\caption{Ablation Study Results: Performance Comparison Across Different Scenarios}
+\label{tab:ablation_results}
+\begin{tabular}{|l|cc|cc|cc|cc|}
+\hline
+\multirow{2}{*}{\textbf{Scenario}} & \multicolumn{2}{c|}{\textbf{Vanilla DQN}} & \multicolumn{2}{c|}{\textbf{+ Reward Shaping}} & \multicolumn{2}{c|}{\textbf{+ Action Masking}} & \multicolumn{2}{c|}{\textbf{Complete Agent}} \\
+& Success & Reward & Success & Reward & Success & Reward & Success & Reward \\
+\hline
+5 loc, Stable & 100\% & 436 & 100\% & -722 & 100\% & 414 & 100\% & 437 \\
+5 loc, Unstable & 100\% & 409 & 100\% & -252 & 100\% & 422 & 100\% & 425 \\
+8 loc, Stable & 60\% & -5724 & 40\% & -7605 & 100\% & 445 & 100\% & 671 \\
+8 loc, Unstable & 100\% & 667 & 100\% & -2399 & 100\% & 646 & 100\% & 639 \\
+15 loc, Extreme & 100\% & 1326 & 80\% & -9109 & 100\% & 1289 & 100\% & 1290 \\
+15 loc, Stable & 100\% & -4711 & 100\% & -5463 & 100\% & 1489 & 100\% & 1410 \\
+15 loc, Unstable & 100\% & -5672 & 70\% & -11678 & 100\% & 1387 & 100\% & 1373 \\
+20 loc, Extreme & 70\% & -17546 & 0\% & -39973 & 100\% & 1012 & 100\% & 701 \\
+20 loc, Stable & 0\% & -40203 & 80\% & -13716 & 0\% & -30768 & 100\% & 1317 \\
+20 loc, Unstable & 20\% & -33562 & 20\% & -33433 & 90\% & -1945 & 100\% & 1020 \\
+\hline
+\end{tabular}
+\end{table}
